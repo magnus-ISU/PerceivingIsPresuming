@@ -55,13 +55,13 @@ var sfCorrect = new Array(2);
 var sfWrong = new Array(2);
 
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/5_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/5_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
   
   
   for (var i = 0; i < vid.length; i++) {
-    var sfNameCorrect = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/5_farfar_aCorrect" + i+".mp3";
-    var sfNameWrong = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/5_farfar_aWrong"+i+".mp3";
+    var sfNameCorrect = "../assets/5_farfar_aCorrect" + i+".mp3";
+    var sfNameWrong = "../assets/5_farfar_aWrong"+i+".mp3";
 
     sfCorrect[i] = loadSound(sfNameCorrect);
     sfWrong[i]= loadSound(sfNameWrong);
@@ -69,7 +69,7 @@ function preload() {
     sfCorrect[i].stop();
     sfWrong[i].stop();
     
-    var vidName = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/5_far_v"+ i+".mp4";
+    var vidName = "../assets/5_far_v"+ i+".mp4";
 
     vid[i] = createVideo(vidName);
     vid[i].size(532, 600);

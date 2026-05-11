@@ -43,9 +43,9 @@ showWords = false;
 var vid;
 
 function preload() {
-    insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/11_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
-  vid = createVideo("https://cwbiggs.github.io/PerceivingIsPresuming/assets/11_reporter.mp4");
+    insJson = loadJSON("../jsonfiles/11_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
+  vid = createVideo("../assets/11_reporter.mp4");
   vid.position(borders[0], borders[1] + header);
   vid.size(532, 600);
   vid.hide();

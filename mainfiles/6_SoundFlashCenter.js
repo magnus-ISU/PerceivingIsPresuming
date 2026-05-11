@@ -90,12 +90,12 @@ var soundFileTrigger = false;
 
 //load files
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/6_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/6_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
   for (var i = 0; i < sf.length; i++) {
     var name = "6_click" + i;
-    var thisFile = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/" + name + ".mp3";
-    var thisFileB = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/" + name + "B" + ".mp3";
+    var thisFile = "../assets/" + name + ".mp3";
+    var thisFileB = "../assets/" + name + "B" + ".mp3";
     sf[i] = loadSound(thisFile);
     sfB[i] = loadSound(thisFileB);
   }

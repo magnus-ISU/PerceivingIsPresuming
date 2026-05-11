@@ -31,15 +31,15 @@ var normSF = new Array(3);
 
 //load files
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/9_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/9_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
 
-  normSF[0] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/9_apples3.mp3");
-  swsSF[0] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/9_apples3SWS.mp3");
-  normSF[1] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/9_efl2.mp3");
-  swsSF[1] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/9_efl2SWS.mp3");
-  normSF[2] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/9_lunch1.mp3");
-  swsSF[2] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/9_lunch1SWS.mp3");
+  normSF[0] = loadSound("../assets/9_apples3.mp3");
+  swsSF[0] = loadSound("../assets/9_apples3SWS.mp3");
+  normSF[1] = loadSound("../assets/9_efl2.mp3");
+  swsSF[1] = loadSound("../assets/9_efl2SWS.mp3");
+  normSF[2] = loadSound("../assets/9_lunch1.mp3");
+  swsSF[2] = loadSound("../assets/9_lunch1SWS.mp3");
   for(var i = 0; i < normSF; i++){
     normSF[i].noLoop();
     normSF[i].stop();

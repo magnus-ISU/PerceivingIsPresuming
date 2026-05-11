@@ -56,16 +56,16 @@ var sfWrong = new Array(2);
 
 
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/3_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/3_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
   
-  sfWrong[0] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/3_baga_aWrong0n1a.mp3");
-  sfWrong[1] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/3_baga_aWrong1n1a.mp3");
-  sfCorrect[0] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/3_baga_aCorrect0n1a.mp3");
-  sfCorrect[1] = loadSound("https://cwbiggs.github.io/PerceivingIsPresuming/assets/3_baga_aCorrect1n1a.mp3");
+  sfWrong[0] = loadSound("../assets/3_baga_aWrong0n1a.mp3");
+  sfWrong[1] = loadSound("../assets/3_baga_aWrong1n1a.mp3");
+  sfCorrect[0] = loadSound("../assets/3_baga_aCorrect0n1a.mp3");
+  sfCorrect[1] = loadSound("../assets/3_baga_aCorrect1n1a.mp3");
   
-  vid[0] = createVideo("https://cwbiggs.github.io/PerceivingIsPresuming/assets/3_baga_v0n1a_1.mp4");
-  vid[1] = createVideo("https://cwbiggs.github.io/PerceivingIsPresuming/assets/3_baga_v1n1a.mp4");
+  vid[0] = createVideo("../assets/3_baga_v0n1a_1.mp4");
+  vid[1] = createVideo("../assets/3_baga_v1n1a.mp4");
   
   for (var i = 0; i < vid.length; i++) {
     sfCorrect[i].stop();

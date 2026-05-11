@@ -79,11 +79,11 @@ var sf = new Array(6);
 
 //load files
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/8_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/8_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
   for (var i = 0; i < sf.length; i++) {
     var name = "click" + i;
-    var thisFile = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/" + "8_click" + i + ".mp3";
+    var thisFile = "../assets/" + "8_click" + i + ".mp3";
     sf[i] = loadSound(thisFile);
   }
 }

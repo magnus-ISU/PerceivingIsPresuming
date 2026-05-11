@@ -115,7 +115,7 @@ function Interface(n, x, y, x1, y1) {
       il + 60 - 50,
       50,
       25,
-      "https://perceivingispresuming.net/examples" //link text
+      "../index.html" //link text
     );
     if (home.help()) {
       helper.make("click to return to main page");

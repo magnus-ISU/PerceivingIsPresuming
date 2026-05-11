@@ -25,9 +25,9 @@ var fr=30;
 
  //files
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/14_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
- pic=loadImage("https://cwbiggs.github.io/PerceivingIsPresuming/assets/14_theDress.jpg");
+  insJson = loadJSON("../jsonfiles/14_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
+ pic=loadImage("../assets/14_theDress.jpg");
    
 }
   

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Perceiving Is Presuming — Examples</title>
+  <style>
+    :root {
+      --bg: #1c1c1c;
+      --panel: #2a2a2a;
+      --accent: #ffeb05;
+      --accent-hover: #fff36b;
+      --text: #f4f4f4;
+      --muted: #b0b0b0;
+      --border: #1464ff;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      padding: 2rem 1rem 1rem;
+      text-align: center;
+      border-bottom: 2px solid var(--border);
+    }
+    header h1 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      color: #36ff00;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem 1rem 3rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--panel);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover, .card:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      outline: none;
+    }
+    .card .num {
+      color: var(--accent);
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--text);
+    }
+    .card.disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .card .badge {
+      font-size: 0.75rem;
+      color: var(--muted);
+      align-self: flex-start;
+      border: 1px solid var(--muted);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Perceiving Is Presuming</h1>
+    <p>Interactive examples illustrating how perception is built from expectation.</p>
+  </header>
+  <main class="grid" id="grid"></main>
+  <footer>
+    Local mirror of <a href="https://cwbiggs.github.io/PerceivingIsPresuming/" rel="noopener">cwbiggs.github.io/PerceivingIsPresuming</a>.
+  </footer>
+  <script>
+    const examples = [
+      { n: 1,  title: "Hollow Face 1",         href: "html_files/1_html.html"  },
+      { n: 2,  title: "That Fat Bat",          href: "html_files/2_html.html"  },
+      { n: 3,  title: "Da Tha",                href: "html_files/3_html.html"  },
+      { n: 4,  title: "Var Var",               href: "html_files/4_html.html"  },
+      { n: 5,  title: "Far Far",               href: "html_files/5_html.html"  },
+      { n: 6,  title: "Sound Flash Center",    href: "html_files/6_html.html"  },
+      { n: 7,  title: "Sound Flash Periphery", href: "html_files/7_html.html"  },
+      { n: 8,  title: "Motion Bounce",         href: "html_files/8_html.html"  },
+      { n: 9,  title: "Sine Wave Speech",      href: "html_files/9_html.html"  },
+      { n: 10, title: "Noisy Room",            href: "html_files/10_html.html" },
+      { n: 11, title: "Reporter",              href: "html_files/11_html.html" },
+      { n: 12, title: "Ames Room",             href: "html_files/12_html.html" },
+      { n: 13, title: "Ames Room Revisited",   href: null, badge: "unavailable" },
+      { n: 14, title: "The Dress",             href: "html_files/14_html.html" },
+      { n: 15, title: "The Dress Revisited",   href: "html_files/15_html.html" },
+      { n: 16, title: "Two Grays",             href: "html_files/16_html.html" },
+      { n: 17, title: "Shepard Tables",        href: "html_files/17_html.html" },
+      { n: 18, title: "Moon Walk",             href: null, badge: "unavailable" },
+      { n: 19, title: "Hollow Face 2",         href: "html_files/19_html.html", badge: "unavailable" },
+      { n: 20, title: "Chess",                 href: null, badge: "unavailable" }
+    ];
+
+    const grid = document.getElementById("grid");
+    for (const ex of examples) {
+      const tag = ex.href ? "a" : "div";
+      const el = document.createElement(tag);
+      el.className = "card" + (ex.href ? "" : " disabled");
+      if (ex.href) el.href = ex.href;
+      el.innerHTML = `
+        <span class="num">Example ${ex.n}</span>
+        <h2>${ex.title}</h2>
+        ${ex.badge ? `<span class="badge">${ex.badge}</span>` : ""}
+      `;
+      grid.appendChild(el);
+    }
+  </script>
+</body>
+</html>

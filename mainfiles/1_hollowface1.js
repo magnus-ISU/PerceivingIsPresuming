@@ -43,10 +43,10 @@ var insJson, examples;
 
 function preload() {
 
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/1_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/1_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
   
-  vid = createVideo("https://cwbiggs.github.io/PerceivingIsPresuming/assets/1_HollowFaceLoop2.mp4");
+  vid = createVideo("../assets/1_HollowFaceLoop2.mp4");
   vid.size(532, 600);
   vid.position(borders[0], borders[1] + header);
   vid.show();

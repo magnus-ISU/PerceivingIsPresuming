@@ -29,11 +29,11 @@ var fr=30;
 
  //files
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/15_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/15_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
   
   for(var i = 0; i< picNames.length; i++){
-  var name = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/"+picNames[i];
+  var name = "../assets/"+picNames[i];
     pictures[i]=loadImage(name);
    }
 }

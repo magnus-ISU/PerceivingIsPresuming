@@ -29,11 +29,11 @@ var whichVideo = 0;
 var vid = new Array(3);
 
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/17_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/17_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
 
   for (var i = 0; i < vid.length; i++) {
-    var vidName = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/17_" + i + "shepard" + ".mp4";
+    var vidName = "../assets/17_" + i + "shepard" + ".mp4";
     vid[i] = createVideo(vidName);
 
     vid[i].position(borders[0], borders[1] + header);

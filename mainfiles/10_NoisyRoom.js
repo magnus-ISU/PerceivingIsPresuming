@@ -50,10 +50,10 @@ let noise;
 var lp;
 
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/10_ins.json");
-  examples = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
+  insJson = loadJSON("../jsonfiles/10_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
   for (var i = 0; i < vid.length; i++) {
-    var vidName = "https://cwbiggs.github.io/PerceivingIsPresuming/assets/" + "10_noise" + i + ".mp4";
+    var vidName = "../assets/" + "10_noise" + i + ".mp4";
     vid[i] = createVideo(vidName);
     vid[i].size(532, 600);
     vid[i].position(borders[0], borders[1] + header);

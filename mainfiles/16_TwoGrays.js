@@ -34,9 +34,9 @@ var strokeDrawn = false;
 var tg;//variable to hold picture
 
 function preload() {
-  insJson = loadJSON("https://cwbiggs.github.io/PerceivingIsPresuming/jsonfiles/16_ins.json");
-  examples = loadJSON("https://cwbiggs.gisetso/PerceivingIsPresuming/jsonfiles/examplesMenu.json");
-  tg = loadImage('https://cwbiggs.gisetso/PerceivingIsPresuming/assets/16_twoGrays.png');
+  insJson = loadJSON("../jsonfiles/16_ins.json");
+  examples = loadJSON("../jsonfiles/examplesMenu.json");
+  tg = loadImage('../assets/16_twoGrays.png');
 }
 
 var fr = 120; //set the frame rate, faster updates makes it less likely the user leaves the rectangle beyond when they drag
