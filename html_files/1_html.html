@@ -1,25 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1164, initial-scale=1">
-    <title>PiP Example 1</title>
-
-  </head>
-  <body>
-    <main>
-    </main>
-    <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/RotateSelect.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../mainfiles/1_hollowface1.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 1: Hollow Face 1</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="1">
+      <h1 class="pip-title">Example 1: Hollow Face 1</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage">
+        <video id="ex1-video" src="../assets/1_HollowFaceLoop2.mp4" loop playsinline preload="metadata" width="532" height="600"></video>
+        <div class="pip-controls" id="ex1-controls"></div>
+      </div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Click <strong>Run</strong> to watch the mask rotate. Click again at any point to pause; click again to resume.</li>
+          <li>Notice that the painted (concave) side of the mask often looks convex, even though it's facing away.</li>
+          <li>Use the <strong>speed</strong> slider to see whether playback speed changes your experience.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list. Open the example menu below to jump to any other demo.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const video = document.getElementById("ex1-video");
+      const controls = document.getElementById("ex1-controls");
+      const runToggle = pipToggle({
+        label: "Run", help: "click to start or pause the rotation",
+        onChange: (on) => { on ? video.play() : video.pause(); },
+      });
+      const speed = pipSlider({
+        label: "Speed", min: 0.25, max: 4, step: 0.25, value: 1,
+        help: "change video playback speed",
+        format: (v) => v.toFixed(2) + "×",
+        onChange: (v) => { video.playbackRate = v; },
+      });
+      const reset = pipButton({
+        label: "Reset", help: "rewind and restore the default speed",
+        onClick: () => {
+          video.pause();
+          video.currentTime = 0;
+          speed._reset();
+          runToggle._reset();
+        },
+      });
+      controls.append(runToggle, speed, reset);
+    });
+  </script>
+</body>
 </html>

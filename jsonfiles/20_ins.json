@@ -1,9 +1,0 @@
-{
-    "text" : ["1. The chess pieces appear to be different colors.",
-              "2. Click 'Still Image' in order to start a video that will animate the pieces.",
-        "3. Click the same place in order to see another video.",
-        "4. Click again to return to the still image.", 
-       "Click home to navigate back to the home page. Click Show/Hide Example List to display a menu to the right navigate to another example from this page."
-        ],
-    "boundry" : [30,30, 30, 300,70]
-}

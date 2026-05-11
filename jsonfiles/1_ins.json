@@ -1,8 +1,0 @@
-{
-    "text" : ["1. Click the box below “Run” to watch the mask rotate twice. After two rotations, it will flash. Click the box below “Run” again to restart the rotation—you can also click this box to pause the rotation at any point and then click again to restart it.",
-        "2. Notice that the painted side of the mask often looks convex, even though it is concave.",
-        "3. Play with the speed control to see whether the speed impacts your experience.",
-         "Click home to navigate back to the home page. Click Show/Hide Example List to display a menu to the far right that allows you to navigate direclty to another example from this page."
-        ],
-    "boundry" : [90, 50, 285, 90]
-}

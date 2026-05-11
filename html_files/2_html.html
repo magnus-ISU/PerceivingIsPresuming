@@ -1,25 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1190, initial-scale=1">
-    <title>PiP Example 2</title>
-
-  </head>
-  <body>
-    <main>
-    </main>
-    <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/RotateSelect.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../mainfiles/2_ThatFatBat.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 2: That Fat Bat</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+  <script src="../app/mcgurk.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="2">
+      <h1 class="pip-title">Example 2: That Fat Bat (McGurk Illusion)</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage"></div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Use the speaker selector to choose Meredith, David, or Rhea.</li>
+          <li>Press <strong>Run</strong> — the video and audio loop together.</li>
+          <li>Listen for what you hear. Try <strong>Change Audio</strong> to swap between the two possible recordings.</li>
+          <li>Use <strong>Show Words</strong> to see the actual words on the audio track, and <strong>Show Video</strong> to hide the face and listen alone.</li>
+          <li>Hit <strong>Restart</strong> if the audio drifts out of sync with the video.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      pipMcgurkSketch({
+        speakers: [
+          { name: "Meredith", video: "../assets/2_v0_1.mp4", correctAudio: "../assets/2_aCorrect0.mp3", wrongAudio: "../assets/2_aWrong0.mp3" },
+          { name: "David",    video: "../assets/2_v1_1.mp4", correctAudio: "../assets/2_aCorrect1.mp3", wrongAudio: "../assets/2_aWrong1.mp3" },
+          { name: "Rhea",     video: "../assets/2_v2_1.mp4", correctAudio: "../assets/2_aCorrect2.mp3", wrongAudio: "../assets/2_aWrong2.mp3" },
+        ],
+        words: ["Actual audio: “Bat Bat Bat”", "Actual audio: “That Fat Bat”"],
+      });
+    });
+  </script>
+</body>
 </html>

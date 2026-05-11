@@ -1,26 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1164, initial-scale=1">
-    <title>PiP Example 11</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 11: Reporter</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+  <style>
+    .ex11-listen {
+      position: absolute;
+      top: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.4rem 0.9rem;
+      background: rgba(0, 0, 0, 0.65);
+      color: #ff4040;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    .ex11-video-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="11">
+      <h1 class="pip-title">Example 11: Reporter</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage" id="ex11-stage">
+        <div class="ex11-video-wrap">
+          <video id="ex11-video" src="../assets/11_reporter.mp4" loop playsinline preload="metadata"></video>
+          <div class="ex11-listen" id="ex11-listen" hidden>LISTEN CLOSELY NOW</div>
+        </div>
+        <p class="pip-words" id="ex11-words" hidden></p>
+        <div class="pip-controls" id="ex11-controls"></div>
+      </div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Press <strong>Run</strong> and listen to the reporter — the words may sound like gibberish.</li>
+          <li>Toggle <strong>Show Words</strong> to see a possible interpretation of what's being said.</li>
+          <li>Use the text rotator to switch between two competing interpretations and notice how each one makes the audio fit.</li>
+          <li>When the on-screen "LISTEN CLOSELY NOW" banner appears, focus your hearing — that's the key segment.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const video = document.getElementById("ex11-video");
+      const listen = document.getElementById("ex11-listen");
+      const words = document.getElementById("ex11-words");
+      const controls = document.getElementById("ex11-controls");
+      const texts = [
+        "I think you're a lying bitch.".toUpperCase(),
+        "Okay, you don't want to engage.".toUpperCase(),
+      ];
+      let whichText = 0;
 
-  </head>
-  <body>
-    <main>
-    </main>
-            <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelect.js"></script>
-    <script src="../mainfiles/11_Reporter.js"></script>
-  </body>
+      const toggleRun = pipToggle({
+        label: "Run", help: "start or stop the video",
+        onChange: (on) => { on ? video.play() : video.pause(); },
+      });
+      const toggleShowWords = pipToggle({
+        label: "Show Words", defaultOn: false,
+        help: "display a possible interpretation of the words spoken",
+        onChange: refreshWords,
+      });
+      const rotateText = pipRotate({
+        items: ["Text A", "Text B"],
+        help: "switch between the two competing interpretations",
+        onChange: (i) => { whichText = i; refreshWords(); },
+      });
+      const buttonReset = pipButton({
+        label: "Reset",
+        help: "rewind everything to defaults",
+        onClick: () => {
+          video.pause(); video.currentTime = 0;
+          toggleRun._reset();
+          toggleShowWords._reset();
+          rotateText._reset();
+        },
+      });
+      controls.append(toggleRun, toggleShowWords, rotateText, buttonReset);
+
+      function refreshWords() {
+        if (toggleShowWords.checked) {
+          words.hidden = false;
+          words.textContent = texts[whichText];
+        } else {
+          words.hidden = true;
+        }
+      }
+
+      //Show the "LISTEN CLOSELY NOW" overlay only between 5–7 seconds.
+      video.addEventListener("timeupdate", () => {
+        const t = video.currentTime;
+        listen.hidden = !(t >= 5 && t < 7);
+      });
+    });
+  </script>
+</body>
 </html>

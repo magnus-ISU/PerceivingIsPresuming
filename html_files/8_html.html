@@ -1,27 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-<!--     <script src="path/to/p5.sound.js"></script> -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=900, initial-scale=1">
-    <title>PiP Example 8</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 8: Motion Bounce</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="8">
+      <h1 class="pip-title">Example 8: Motion Bounce</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage" id="ex8-stage"></div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Press <strong>Run</strong> to start the balls moving across the circle.</li>
+          <li>With sound off, the balls may appear to pass through each other.</li>
+          <li>Turn <strong>Sound</strong> on — the click when the balls meet biases your perception toward seeing them bounce off each other.</li>
+          <li>Use the sliders to tweak speed, ball size, rotation, color, and the number of pairs.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const stage = document.getElementById("ex8-stage");
+      const W = 420, H = 420;
+      const canvas = document.createElement("canvas");
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      stage.appendChild(canvas);
 
-  </head>
-  <body>
-    <main>
-    </main>
-    <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelectAlternative.js"></script>
-    <script src="../mainfiles/8_MotionBounce.js"></script>
-  </body>
+      const controls = document.createElement("div");
+      controls.className = "pip-controls";
+      stage.appendChild(controls);
+      const sliderHost = document.createElement("div");
+      stage.appendChild(sliderHost);
+
+      const clicks = [0,1,2,3,4,5].map((i) => {
+        const a = new Audio(`../assets/8_click${i}.mp3`);
+        a.preload = "auto";
+        return a;
+      });
+
+      let isRunning = false;
+      let isClicking = false;
+      let soundIndex = 2;
+
+      const sliderSize  = pipSlider({ label: "Size",        min: 10, max: 100, step: 1, value: 34, help: "ball size in pixels",          format: (v) => v + "px" });
+      const sliderSpeed = pipSlider({ label: "Speed",       min: 1,  max: 8,   step: 1, value: 3,  help: "horizontal speed",             format: (v) => v + "px/frame" });
+      const sliderAlpha = pipSlider({ label: "Transparency",min: 0,  max: 1,   step: 0.01, value: 0.1, help: "see-through-ness", format: (v) => v.toFixed(2) });
+      const sliderRot   = pipSlider({ label: "Rotation",    min: 0,  max: 360, step: 1, value: 0,  help: "angle of the line of motion",  format: (v) => v + "°" });
+      const sliderQty   = pipSlider({ label: "Pairs",       min: 1,  max: 16,  step: 1, value: 1,  help: "number of ball pairs",         format: (v) => v });
+      const sliderColor = pipSlider({ label: "Color",       min: 0,  max: 1,   step: 0.01, value: 0, help: "ball hue",                  format: (v) => v.toFixed(2) });
+
+      const toggleRun = pipToggle({
+        label: "Run", help: "start or stop the balls",
+        onChange: (on) => { isRunning = on; },
+      });
+      const toggleSound = pipToggle({
+        label: "Sound", defaultOn: false, help: "play a click whenever the pair crosses",
+        onChange: (on) => { isClicking = on; },
+      });
+      const rotateSound = pipRotate({
+        items: ["Click 0", "Click 1", "Click 2", "Click 3", "Click 4", "Click 5"],
+        defaultIndex: 2, help: "switch which click sound is played",
+        onChange: (i) => { soundIndex = i; },
+      });
+      const reset = pipButton({
+        label: "Reset", help: "restore defaults",
+        onClick: () => {
+          [sliderSize, sliderSpeed, sliderAlpha, sliderRot, sliderQty, sliderColor].forEach((s) => s._reset());
+          toggleRun._reset();
+          toggleSound._reset();
+          rotateSound._reset();
+        },
+      });
+
+      controls.append(toggleRun, toggleSound, rotateSound, reset);
+      sliderHost.append(sliderSize, sliderSpeed, sliderAlpha, sliderRot, sliderQty, sliderColor);
+
+      function colorFromHue(c, alpha) {
+        let r, g, b;
+        if (c < 0.25) { r = 255; g = Math.floor((1 - c / 0.25) * 255); b = g; }
+        else if (c < 0.5) { r = Math.floor((1 - (c - 0.25) / 0.25) * 255); g = 255 - r; b = 0; }
+        else if (c < 0.75) { r = 0; g = Math.floor((1 - (c - 0.5) / 0.25) * 255); b = 255 - g; }
+        else { r = Math.floor(((c - 0.75) / 0.25) * 255); g = r; b = 255 - g; }
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      function playClick() {
+        if (!isClicking) return;
+        try { clicks[soundIndex].currentTime = 0; clicks[soundIndex].play().catch(() => {}); } catch (_) {}
+      }
+
+      const cx = W / 2;
+      const cy = H / 2;
+      const radius = W / 2 - 10;
+      let x = -radius + sliderSize.value;
+      let dir = 1;
+      let prevHit = false;
+
+      function render() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, W, H);
+        //Outline circle (the workspace boundary).
+        ctx.strokeStyle = "rgba(20, 100, 255, 0.7)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const size = sliderSize.value;
+        const speed = sliderSpeed.value;
+        const alpha = 1 - sliderAlpha.value;
+        const fillStyle = colorFromHue(sliderColor.value, alpha);
+
+        if (isRunning) {
+          x += speed * dir;
+          const limit = radius - size / 2;
+          if (x > limit || x < -limit) dir *= -1;
+        }
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate((sliderRot.value * Math.PI) / 180);
+        const pairs = Math.max(1, Math.round(sliderQty.value));
+        ctx.fillStyle = fillStyle;
+        for (let i = 0; i < pairs; i++) {
+          const angle = (Math.PI * i) / pairs;
+          ctx.save();
+          ctx.rotate(angle);
+          ctx.beginPath();
+          ctx.arc(x, 0, size / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(-x, 0, size / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.restore();
+
+        const hit = Math.abs(x) < size / 2;
+        if (isRunning && hit && !prevHit) playClick();
+        prevHit = hit;
+      }
+      pipLoop(render);
+    });
+  </script>
+</body>
 </html>

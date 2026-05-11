@@ -1,9 +1,0 @@
-{
-    "text" : ["1. Click the box below “Run” to watch the video.",
-        "2. Note whether the balls appear to pass or appear to bounce.",
-        "3. Make the balls switch what they appear to do by adjusting the settings. (To make the balls appear to bounce, adjust the size and transparency to their minimum values and adjust the speed to its maximum value. To make the balls appear to pass, adjust the size and transparency to their maximum values and adjust the speed to its minimum value.)",
-        "4. Click “Reset” to load the default settings. ",
-       "5. Try to find a borderline setting: a setting where the balls appear to pass but decreasing the size and transparency slightly (or increasing the speed slightly) makes them appear to bounce (or like they sometimes pass and sometimes bounce).", "6. Once you find the borderline setting, watch the balls pass a few times and then click the box below “Sound” to add a click.", "7. Note that for many people, adding the click makes the balls look like they bounce instead of pass."
-        ],
-    "boundry" : [30, 50, 150, 30,  110, 70, 90]
-}

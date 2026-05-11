@@ -1,9 +1,0 @@
-{
-    "text" : ["1. Look at the dress.",
-        "2. Notice its colors—most people say it looks bluish and blackish.",
-        "3. Click on the box that says “Daylight” so that it reads “Nightlight”. ",
-        "4. Notice the dress’s colors—most people say it looks whitish and goldish.", "5. Click on the box that says “Nightlight” so that it reads “Side-by-Side” to display both images.", "6.  Notice the colors of each dress—most people say the dress on the left is whitish and goldish while the dress on the right is bluish and blackish.",
-        "Both images were taken from “Disambiguating the Dress” by Rosa Lafer-Sousa.",        "Click home to navigate back to the home page. Click Show/Hide Example List to display a menu to the right navigate to another example from this page."
-        ],
-    "boundry" : [30, 30, 30, 30,50, 50, 50, 70]
-}

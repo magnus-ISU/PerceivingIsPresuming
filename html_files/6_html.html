@@ -1,27 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-<!--     <script src="path/to/p5.sound.js"></script> -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=900, initial-scale=1">
-    <title>PiP Example 6</title>
-
-  </head>
-  <body>
-    <main>
-    </main>
-    <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelectAlternative.js"></script>
-    <script src="../mainfiles/6_SoundFlashCenter.js"></script>    
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 6: Sound Flash Center</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+  <script src="../app/flash.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="6">
+      <h1 class="pip-title">Example 6: Sound Flash Center</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage"></div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Press <strong>Run</strong>. A circle flashes at the center while a click sound plays.</li>
+          <li>Every other flash includes a double click — does the flash seem to flash twice when two clicks play?</li>
+          <li>Try turning <strong>Sound</strong> off to see the flash without audio, and back on to confirm the difference.</li>
+          <li>Use the sliders to change the flash's size, color, transparency, timing, and the gap before the second click.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      pipFlashSketch({
+        variant: "center",
+        workspace: { width: 400, height: 400 },
+        clickSounds: [0,1,2,3,4,5].map((i) => `../assets/6_click${i}.mp3`),
+        doubleClickSounds: [0,1,2,3,4,5].map((i) => `../assets/6_click${i}B.mp3`),
+      });
+    });
+  </script>
+</body>
 </html>

@@ -1,8 +1,0 @@
-{
-    "text" : ["1. Click on the box below “Run” to listen to a noisy audio recording.",
-        "2. Try to find the voice in the noise and to hear what it says.",
-        "3. After several seconds, click on the box below “Show Video” to watch the speaker. ", "4. Notice that seeing the speaker helps you hear the voice better.", "5. If you can’t hear the speaker even when you see the video, then use the slider to reduce the noise until you can hear the speech while watching the video, then click on the box labeled “Sentence 1” so that it reads “Sentence 2” before repeating steps 1-4.",
-       "Click home to navigate back to the home page. Click Show/Hide Example List to display a menu to the right navigate to another example from this page."
-        ],
-    "boundry" : [30, 30, 50, 30, 370, 90]
-}

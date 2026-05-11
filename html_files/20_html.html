@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 20: Chess</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="20">
+      <h1 class="pip-title">Example 20: Chess</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage">
+        <img id="ex20-still" src="../assets/20_chessStill.png" alt="Still chess board with two pieces" style="width: 100%; max-width: 900px; aspect-ratio: 16 / 9; object-fit: contain;">
+        <video id="ex20-vid" hidden playsinline preload="metadata" style="width: 100%; max-width: 900px; aspect-ratio: 16 / 9; object-fit: contain;"></video>
+        <div class="pip-controls" id="ex20-controls" style="justify-content: center;"></div>
+      </div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>The two chess pieces look like very different colors.</li>
+          <li>Click <strong>Play animation</strong> to watch a video that makes the pieces' true colors clear.</li>
+          <li>Click again to see a second video, then once more to return to the still image.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const still = document.getElementById("ex20-still");
+      const vid = document.getElementById("ex20-vid");
+      const controls = document.getElementById("ex20-controls");
+      const states = [
+        { show: "still",                                     nextLabel: "Play animation" },
+        { show: "vid", src: "../assets/20_chessVid1.mp4",    nextLabel: "Play alternate animation" },
+        { show: "vid", src: "../assets/20_chessVid2.mp4",    nextLabel: "Return to still image" },
+      ];
+      let i = 0;
+      const btn = pipButton({ label: states[0].nextLabel, help: "advance to the next view" });
+      controls.appendChild(btn);
+
+      function apply() {
+        const cur = states[i];
+        btn.textContent = cur.nextLabel;
+        if (cur.show === "still") {
+          vid.pause();
+          vid.hidden = true;
+          vid.removeAttribute("src");
+          vid.load();
+          still.hidden = false;
+        } else {
+          still.hidden = true;
+          if (vid.getAttribute("src") !== cur.src) vid.src = cur.src;
+          vid.hidden = false;
+          vid.loop = true;
+          vid.play().catch(() => {});
+        }
+      }
+      btn.addEventListener("click", () => { i = (i + 1) % states.length; apply(); });
+      apply();
+    });
+  </script>
+</body>
+</html>

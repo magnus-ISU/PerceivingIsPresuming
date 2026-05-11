@@ -1,26 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1350, initial-scale=1">
-    <title>PiP Example 17</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 17: Shepard Tables</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="17">
+      <h1 class="pip-title">Example 17: Shepard Tables</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage" id="ex17-stage"></div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Pick a video and press <strong>Run</strong>.</li>
+          <li>The two tabletops look like they have very different shapes — long and narrow vs. short and wide.</li>
+          <li>The animation rotates or overlays one onto the other so you can see they're actually identical parallelograms.</li>
+          <li>Even after seeing the proof, the size illusion persists when you go back to the still image.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const stage = document.getElementById("ex17-stage");
+      const labels = ["Move", "Exchange", "Obama"];
+      const videos = labels.map((_, i) => {
+        const v = document.createElement("video");
+        v.src = `../assets/17_${i}shepard.mp4`;
+        v.loop = true;
+        v.playsInline = true;
+        v.preload = "auto";
+        v.playbackRate = 2;
+        v.hidden = true;
+        return v;
+      });
+      videos.forEach((v) => stage.appendChild(v));
 
-  </head>
-  <body>
-    <main>
-    </main>
-        <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelect.js"></script>
-    <script src="../mainfiles/17_ShepardTables.js"></script>
-  </body>
+      const controls = document.createElement("div");
+      controls.className = "pip-controls";
+      stage.appendChild(controls);
+
+      let isRunning = false;
+      let whichVideo = 1;
+
+      function updateVisibility() {
+        videos.forEach((v, i) => { v.hidden = i !== whichVideo; });
+      }
+      const toggleRun = pipToggle({
+        label: "Run", help: "play or pause the demonstration video",
+        onChange: (on) => {
+          isRunning = on;
+          videos.forEach((v, i) => {
+            if (i === whichVideo && on) {
+              v.currentTime = 0; v.play().catch(() => {});
+            } else {
+              v.pause();
+            }
+          });
+          rotateSelect.style.display = on ? "none" : "";
+        },
+      });
+      const rotateSelect = pipRotate({
+        items: labels, defaultIndex: 1,
+        help: "click to switch which video plays",
+        onChange: (i) => {
+          videos[whichVideo].pause();
+          whichVideo = i;
+          updateVisibility();
+        },
+      });
+      const reset = pipButton({
+        label: "Reset", help: "stop playback and rewind",
+        onClick: () => {
+          videos.forEach((v) => { v.pause(); v.currentTime = 0; });
+          toggleRun._reset();
+        },
+      });
+
+      controls.append(toggleRun, rotateSelect, reset);
+      updateVisibility();
+    });
+  </script>
+</body>
 </html>

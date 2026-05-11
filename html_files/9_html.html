@@ -1,27 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=900, initial-scale=1">
-    <title>PiP Example 9</title>
-
-  </head>
-  <body>
-    <main>
-    </main>
-        <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelectAlternative.js"></script>
-    <script src="../mainfiles/9_SineWaveSpeech.js"></script>
-
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 9: Sine Wave Speech</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+  <style>
+    .ex9-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .ex9-row > button { width: 100%; }
+    .ex9-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0.5rem 0 0.25rem;
+    }
+    @media (max-width: 500px) {
+      .ex9-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="9">
+      <h1 class="pip-title">Example 9: Sine Wave Speech</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage" id="ex9-stage"></div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Click <strong>Play Sine Wave Speech</strong> for one of the rows. It will sound like meaningless whistles or chirps.</li>
+          <li>Then click <strong>Play Normal Speech</strong> for the same row to hear the original sentence.</li>
+          <li>Now play the sine wave version again — once your brain knows the words, the whistles snap into intelligible speech.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const rows = [
+        { sws: "../assets/9_apples3SWS.mp3", norm: "../assets/9_apples3.mp3", label: "Sentence 1" },
+        { sws: "../assets/9_efl2SWS.mp3",    norm: "../assets/9_efl2.mp3",    label: "Sentence 2" },
+        { sws: "../assets/9_lunch1SWS.mp3",  norm: "../assets/9_lunch1.mp3",  label: "Sentence 3" },
+      ];
+      const stage = document.getElementById("ex9-stage");
+      //Keep one Audio per file so subsequent clicks restart rather than overlap.
+      const players = new Map();
+      function play(src) {
+        for (const a of players.values()) { a.pause(); a.currentTime = 0; }
+        let a = players.get(src);
+        if (!a) { a = new Audio(src); players.set(src, a); }
+        a.currentTime = 0;
+        a.play().catch(() => {});
+      }
+      rows.forEach((r, i) => {
+        const label = document.createElement("div");
+        label.className = "ex9-label";
+        label.textContent = r.label;
+        stage.appendChild(label);
+        const row = document.createElement("div");
+        row.className = "ex9-row";
+        row.append(
+          pipButton({
+            label: `${i + 1}. Play Sine Wave Speech`,
+            help: "play the abstract, whistle-like version of this sentence",
+            onClick: () => play(r.sws),
+          }),
+          pipButton({
+            label: `${i + 1}. Play Normal Speech`,
+            help: "play the original natural-speech version of this sentence",
+            onClick: () => play(r.norm),
+          }),
+        );
+        stage.appendChild(row);
+      });
+    });
+  </script>
+</body>
 </html>

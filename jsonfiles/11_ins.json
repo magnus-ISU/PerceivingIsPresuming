@@ -1,8 +1,0 @@
-{
-    "text" : ["1. Click on the box below “Run” to listen to audio while watching the corresponding video.",
-        "2. Play the recording a couple of times, while trying to decipher the statement made near the end—text telling you to listen closely will appear above the video just before the crucial statement.",
-        "3. As the recording plays, click on the box below “Show Words” to display what some people say they hear, then listen again with those words in mind.", "4. As the recording plays, click on the box labeled “Text A” so that it reads “Text B” to display what other people say they hear, then listen again with those words in mind.", "5. Listen a few more times with each possible interpretation in mind.",
-       "Click home to navigate back to the home page. Click Show/Hide Example List to display a menu to the right navigate to another example from this page."
-        ],
-    "boundry" : [50, 70, 70, 70, 210, 70]
-}

@@ -1,27 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-<!--     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script> -->
-<!--     <script src="path/to/p5.sound.js"></script> -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1220, initial-scale=1">
-    <title>PiP Example 15</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 15: The Dress Revisited</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="15">
+      <h1 class="pip-title">Example 15: The Dress Revisited</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage" id="ex15-stage">
+        <img id="ex15-img" src="../assets/15_dressDay.png" alt="The dress, day lighting" style="width: 100%; max-width: 720px; height: auto;">
+        <div class="pip-controls" id="ex15-controls"></div>
+      </div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Cycle through the four versions using the rotator below the image, or press <kbd>←</kbd> / <kbd>→</kbd>.</li>
+          <li>"Day Light" and "Night Light" show the same dress with two different assumed lightings.</li>
+          <li>The side-by-side views (with and without background) show how strongly the background context changes the apparent color.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const pictures = [
+        { src: "../assets/15_dressDay.png",     label: "Day Light" },
+        { src: "../assets/15_dressNight.png",   label: "Night Light" },
+        { src: "../assets/15_dresses.png",      label: "Side-by-Side" },
+        { src: "../assets/15_noBackground.png", label: "Side-by-Side (no background)" },
+      ];
+      const img = document.getElementById("ex15-img");
+      const controls = document.getElementById("ex15-controls");
 
-  </head>
-  <body>
-    <main>
-    </main>
-                <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelectAlternative.js"></script>
-    <script src="../mainfiles/15_TheDressRevisited.js"></script>  
-  </body>
+      const rotate = pipRotate({
+        items: pictures.map((p) => p.label),
+        help: "click to cycle images, or use the left/right arrow keys",
+        onChange: (i) => {
+          img.src = pictures[i].src;
+          img.alt = `The dress — ${pictures[i].label}`;
+        },
+      });
+      controls.appendChild(rotate);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") { rotate.setIndex(rotate.index + 1); e.preventDefault(); }
+        else if (e.key === "ArrowLeft") { rotate.setIndex(rotate.index - 1); e.preventDefault(); }
+      });
+    });
+  </script>
+</body>
 </html>

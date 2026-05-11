@@ -1,28 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-<!--     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script> -->
-<!--     <script src="path/to/p5.sound.js"></script> -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1742, initial-scale=1">
-    <title>PiP Example 16</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 16: Two Grays</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+  <style>
+    .ex16-canvas-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .ex16-canvas-wrap canvas {
+      width: 100%;
+      height: auto;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="16">
+      <h1 class="pip-title">Example 16: Two Grays</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage" id="ex16-stage">
+        <div class="pip-controls" id="ex16-controls"></div>
+        <div class="ex16-canvas-wrap">
+          <canvas id="ex16-canvas" width="820" height="620"></canvas>
+        </div>
+      </div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Look at the image — the upper square <strong>A</strong> and the lower square <strong>B</strong> appear to be very different shades of gray.</li>
+          <li>Click and drag the small gray rectangle in the upper-left over the A and B squares.</li>
+          <li>The rectangle is exactly the same shade of gray as both A and B — your brain is correcting for the apparent lighting context.</li>
+          <li>Use <strong>Show Connection</strong> to draw a uniform bridge between the two squares, and <strong>Show Outline</strong> to add a border that breaks the lightness-constancy effect.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const canvas = document.getElementById("ex16-canvas");
+      const ctx = canvas.getContext("2d");
+      const controls = document.getElementById("ex16-controls");
+      const W = canvas.width;
+      const H = canvas.height;
 
-  </head>
-  <body>
-    <main>
-    </main>
-    <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelect.js"></script>
-     <script src="../classes/MoveRect.js"></script>
-    <script src="../mainfiles/16_TwoGrays.js"></script>
-  </body>
+      const img = new Image();
+      img.src = "../assets/16_twoGrays.png";
+      let imgReady = false;
+      img.addEventListener("load", () => { imgReady = true; render(); });
+
+      let showConnection = false;
+      let showOutline = false;
+      const grayRect = { x: 20, y: 30, size: 100 };
+      let dragging = false;
+      let imgScale = 0.5;  //the original sketch displays the source image at half size
+
+      const toggleConn = pipToggle({
+        label: "Show Connection",
+        help: "draw a uniform gray bridge between the upper and lower squares",
+        onChange: (on) => { showConnection = on; },
+      });
+      const toggleOutline = pipToggle({
+        label: "Show Outline",
+        help: "draw a border around the bridge — does it still look uniform?",
+        onChange: (on) => { showOutline = on; },
+      });
+      const buttonReset = pipButton({
+        label: "Reset", help: "return the rectangle and toggles to defaults",
+        onClick: () => {
+          grayRect.x = 20; grayRect.y = 30;
+          toggleConn._reset();
+          toggleOutline._reset();
+        },
+      });
+      controls.append(buttonReset, toggleConn, toggleOutline);
+
+      function clientToCanvas(evt) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (evt.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (evt.clientY - rect.top) * (canvas.height / rect.height);
+        return { x, y };
+      }
+      canvas.addEventListener("pointerdown", (e) => {
+        const { x, y } = clientToCanvas(e);
+        if (x >= grayRect.x && x <= grayRect.x + grayRect.size &&
+            y >= grayRect.y && y <= grayRect.y + grayRect.size) {
+          dragging = true;
+          canvas.setPointerCapture(e.pointerId);
+          e.preventDefault();
+        }
+      });
+      canvas.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        const { x, y } = clientToCanvas(e);
+        grayRect.x = Math.max(0, Math.min(W - grayRect.size, x - grayRect.size / 2));
+        grayRect.y = Math.max(0, Math.min(H - grayRect.size, y - grayRect.size / 2));
+      });
+      const stopDrag = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      };
+      canvas.addEventListener("pointerup", stopDrag);
+      canvas.addEventListener("pointercancel", stopDrag);
+
+      const GRAY = "rgb(137, 137, 137)";
+      function render() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, W, H);
+        if (imgReady) {
+          const drawW = img.width * imgScale;
+          const drawH = img.height * imgScale;
+          ctx.drawImage(img, 10, 10, drawW, drawH);
+
+          if (showConnection) {
+            //Roughly bridges the A and B squares vertically in the original layout.
+            ctx.fillStyle = GRAY;
+            if (showOutline) {
+              ctx.strokeStyle = "rgba(5, 164, 248, 0.6)";
+              ctx.lineWidth = 2;
+            }
+            const bx = drawW * 0.42 + 10;
+            ctx.fillRect(bx, 60, 100, drawH - 90);
+            if (showOutline) ctx.strokeRect(bx, 60, 100, drawH - 90);
+          }
+        }
+
+        //The draggable gray rectangle.
+        ctx.fillStyle = GRAY;
+        ctx.fillRect(grayRect.x, grayRect.y, grayRect.size, grayRect.size);
+        if (dragging) {
+          ctx.strokeStyle = "rgba(5, 164, 248, 0.85)";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(grayRect.x, grayRect.y, grayRect.size, grayRect.size);
+        }
+        //Hint text while in starting position.
+        if (grayRect.x === 20 && grayRect.y === 30) {
+          ctx.fillStyle = "#fff";
+          ctx.font = "14px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("DRAG ME", grayRect.x + grayRect.size / 2, grayRect.y + grayRect.size / 2 - 6);
+          ctx.fillText("OVER A AND B", grayRect.x + grayRect.size / 2, grayRect.y + grayRect.size / 2 + 12);
+          ctx.textAlign = "start";
+        }
+      }
+      pipLoop(render);
+    });
+  </script>
+</body>
 </html>

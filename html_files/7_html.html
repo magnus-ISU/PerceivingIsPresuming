@@ -1,27 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-<!--     <script src="path/to/p5.sound.js"></script> -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1500, initial-scale=1">
-    <title>PiP Example 7</title>
-
-  </head>
-  <body>
-    <main>
-    </main>
-        <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelectAlternative.js"></script>
-    <script src="../mainfiles/7_SoundFlashPeriphery.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 7: Sound Flash Periphery</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+  <script src="../app/flash.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="7">
+      <h1 class="pip-title">Example 7: Sound Flash Periphery</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage"></div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Press <strong>Run</strong>. Look at the white cross in the middle.</li>
+          <li>Flashes alternate left and right at the edges of your vision. Click sounds play with each flash.</li>
+          <li>Every other flash includes a double click — when the double click plays, does that flash also seem to flicker twice?</li>
+          <li>Compare with sound off, and play with the sliders to find your own thresholds.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      pipFlashSketch({
+        variant: "periphery",
+        workspace: { width: 700, height: 420 },
+        clickSounds: [0,1,2,3,4,5].map((i) => `../assets/7_click${i}.mp3`),
+        doubleClickSounds: [0,1,2,3,4,5].map((i) => `../assets/7_click${i}B.mp3`),
+      });
+    });
+  </script>
+</body>
 </html>

@@ -1,8 +1,0 @@
-{
-    "text" : ["1. Click on “1 PLAY SINE WAVE SPEECH” to listen to an unusual audio recording.",
-        "2. Notice how it sounds to you, including whether you can understand what the voice says.",
-        "3. Click on “1 PLAY SINE WAVE SPEECH” a few more times to listen to the unusual recording again, then click on “1 Play Normal Speech”, then click again on “1 PLAY SINE WAVE SPEECH”.",
-        "4. Notice that the Sine Wave Speech sounds very different after hearing the ordinary speech.", "5. For the second pair, listen to the normal speech first and the sine wave speech second, noticing how it sounds.", "6. For the third pair, listen to the sine wave speech a few times, then the normal speech, then the sine wave speech again, noticing that how it sounds changes after you hear the ordinary speech."
-        ],
-    "boundry" : [50, 50, 90, 50, 70, 130]
-}

@@ -1,27 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
-<!--     <script src="path/to/p5.sound.js"></script> -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1164, initial-scale=1">
-    <title>PiP Example 10</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 10: Noisy Room</title>
+  <link rel="stylesheet" href="../app/pip.css">
+  <script src="../app/pip.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="pip-layout" data-example="10">
+      <h1 class="pip-title">Example 10: Noisy Room</h1>
+      <div class="pip-help"></div>
+      <div class="pip-stage" id="ex10-stage"></div>
+      <aside class="pip-instructions">
+        <h2 class="pip-instructions-title">Instructions</h2>
+        <ol>
+          <li>Pick a sentence, then press <strong>Run</strong>.</li>
+          <li>Listen for the speaker's voice through the masking noise. You may hear it as garbled or unclear.</li>
+          <li>Toggle <strong>Show Video</strong> on — seeing the speaker often makes the audio suddenly intelligible.</li>
+          <li>Use the noise and voice sliders to find your own threshold of comprehension.</li>
+        </ol>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
+      </aside>
+      <nav class="pip-nav"></nav>
+    </div>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const stage = document.getElementById("ex10-stage");
+      const sentences = [0, 1, 2].map((i) => {
+        const v = document.createElement("video");
+        v.src = `../assets/10_noise${i}.mp4`;
+        v.loop = true;
+        v.playsInline = true;
+        v.preload = "auto";
+        v.hidden = true;
+        return v;
+      });
+      sentences.forEach((v) => stage.appendChild(v));
 
-  </head>
-  <body>
-    <main>
-    </main>
-            <script src="../classes/Button.js"></script>
-    <script src="../classes/Interface.js"></script>
-    <script src="../classes/Link.js"></script>
-    <script src="../classes/Menu.js"></script>
-    <script src="../classes/HelpRegion.js"></script>
-    <script src="../classes/Toggle.js"></script>
-    <script src="../classes/Slider.js"></script>
-    <script src="../classes/drawWords.js"></script>
-    <script src="../classes/RotateSelect.js"></script>
-    <script src="../mainfiles/10_NoisyRoom.js"></script>
-  </body>
+      //Synthetic white noise played through a low-pass filter, looping.
+      //Audio context is created lazily on first user gesture (Run).
+      let audioCtx, noiseSource, noiseGain, lpFilter;
+      function ensureNoise() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const bufferSize = audioCtx.sampleRate * 2;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        noiseSource = audioCtx.createBufferSource();
+        noiseSource.buffer = buffer;
+        noiseSource.loop = true;
+        lpFilter = audioCtx.createBiquadFilter();
+        lpFilter.type = "lowpass";
+        lpFilter.frequency.value = 3000;
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.value = 0;
+        noiseSource.connect(lpFilter).connect(noiseGain).connect(audioCtx.destination);
+        noiseSource.start();
+      }
+
+      let isRunning = false;
+      let sentenceIdx = 0;
+      const controls = document.createElement("div");
+      controls.className = "pip-controls";
+      stage.appendChild(controls);
+
+      const sliderNoise = pipSlider({
+        label: "Noise volume", min: 0, max: 1, step: 0.01, value: 0.5,
+        help: "loudness of the masking noise",
+        format: (v) => Math.round(v * 100) + "%",
+        onChange: (v) => { if (noiseGain) noiseGain.gain.value = v; },
+      });
+      const sliderVoice = pipSlider({
+        label: "Voice volume", min: 0, max: 1, step: 0.01, value: 0.15,
+        help: "loudness of the speaker's voice",
+        format: (v) => Math.round(v * 100) + "%",
+        onChange: (v) => { sentences[sentenceIdx].volume = v; },
+      });
+
+      const toggleShowVideo = pipToggle({
+        label: "Show Video", defaultOn: false,
+        help: "show or hide the speaker's video",
+        onChange: () => updateVisibility(),
+      });
+      function updateVisibility() {
+        sentences.forEach((v, i) => {
+          v.hidden = !(isRunning && i === sentenceIdx && toggleShowVideo.checked);
+        });
+      }
+
+      const toggleRun = pipToggle({
+        label: "Run",
+        help: "start or stop the masked-speech playback",
+        onChange: (on) => {
+          isRunning = on;
+          if (on) {
+            ensureNoise();
+            audioCtx.resume();
+            sentences[sentenceIdx].volume = sliderVoice.value;
+            sentences[sentenceIdx].currentTime = 0;
+            sentences[sentenceIdx].play().catch(() => {});
+            noiseGain.gain.value = sliderNoise.value;
+          } else {
+            sentences.forEach((v) => { v.pause(); v.currentTime = 0; });
+            if (noiseGain) noiseGain.gain.value = 0;
+            toggleShowVideo._reset();
+          }
+          updateVisibility();
+        },
+      });
+
+      const rotateSentence = pipRotate({
+        items: ["Sentence 1", "Sentence 2", "Sentence 3"],
+        help: "pick which sentence is being spoken",
+        onChange: (i) => {
+          //Reset run state when speaker changes — matches the original behavior.
+          if (isRunning) {
+            sentences[sentenceIdx].pause();
+            sentences[sentenceIdx].currentTime = 0;
+            toggleRun._reset();
+          }
+          sentenceIdx = i;
+          updateVisibility();
+        },
+      });
+
+      controls.append(toggleRun, toggleShowVideo, rotateSentence);
+      const sliders = document.createElement("div");
+      sliders.append(sliderNoise, sliderVoice);
+      stage.appendChild(sliders);
+
+      updateVisibility();
+    });
+  </script>
+</body>
 </html>
