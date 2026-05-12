@@ -34,11 +34,11 @@
       <h1 class="pip-title">Example 11: Reporter</h1>
       <div class="pip-help"></div>
       <div class="pip-stage" id="ex11-stage">
-        <div class="ex11-video-wrap">
+        <div class="pip-media-frame">
           <video id="ex11-video" src="../assets/11_reporter.mp4" loop playsinline preload="metadata"></video>
           <div class="ex11-listen" id="ex11-listen" hidden>LISTEN CLOSELY NOW</div>
         </div>
-        <p class="pip-words" id="ex11-words" hidden></p>
+        <p class="pip-words pip-words-empty" id="ex11-words">&nbsp;</p>
         <div class="pip-controls" id="ex11-controls"></div>
       </div>
       <aside class="pip-instructions">
@@ -94,10 +94,11 @@
 
       function refreshWords() {
         if (toggleShowWords.checked) {
-          words.hidden = false;
+          words.classList.remove("pip-words-empty");
           words.textContent = texts[whichText];
         } else {
-          words.hidden = true;
+          words.classList.add("pip-words-empty");
+          words.textContent = " ";
         }
       }
 

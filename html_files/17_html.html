@@ -29,6 +29,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const stage = document.getElementById("ex17-stage");
+      const frame = document.createElement("div");
+      frame.className = "pip-media-frame";
+      stage.appendChild(frame);
       const labels = ["Move", "Exchange", "Obama"];
       const videos = labels.map((_, i) => {
         const v = document.createElement("video");
@@ -40,7 +43,7 @@
         v.hidden = true;
         return v;
       });
-      videos.forEach((v) => stage.appendChild(v));
+      videos.forEach((v) => frame.appendChild(v));
 
       const controls = document.createElement("div");
       controls.className = "pip-controls";
@@ -63,7 +66,8 @@
               v.pause();
             }
           });
-          rotateSelect.style.display = on ? "none" : "";
+          //Keep the video selector in the layout; disable while running.
+          rotateSelect.disabled = on;
         },
       });
       const rotateSelect = pipRotate({

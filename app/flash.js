@@ -18,17 +18,22 @@ function pipFlashSketch(config) {
   const ws = config.workspace || { width: 400, height: 400 };
   const stage = document.querySelector(".pip-stage");
 
-  //The flash area — fixed pixel canvas, scales via CSS to fit narrow viewports.
+  //Wrap the canvas in a placeholder frame so the stage layout doesn't
+  //jump when CSS scales the canvas down on narrow viewports.
+  const frame = document.createElement("div");
+  frame.className = "pip-media-frame";
   const canvas = document.createElement("canvas");
   canvas.width = ws.width;
   canvas.height = ws.height;
   const ctx = canvas.getContext("2d");
-  stage.appendChild(canvas);
+  frame.appendChild(canvas);
+  stage.appendChild(frame);
 
   const controls = document.createElement("div");
   controls.className = "pip-controls";
   stage.appendChild(controls);
   const sliderHost = document.createElement("div");
+  sliderHost.className = "pip-sliders";
   stage.appendChild(sliderHost);
 
   //Audio: pre-create one element per (sound × variant) so play() restarts cleanly.

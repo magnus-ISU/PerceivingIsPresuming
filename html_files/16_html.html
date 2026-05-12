@@ -7,17 +7,7 @@
   <link rel="stylesheet" href="../app/pip.css">
   <script src="../app/pip.js" defer></script>
   <style>
-    .ex16-canvas-wrap {
-      position: relative;
-      width: 100%;
-      max-width: 820px;
-      margin: 0 auto;
-    }
-    .ex16-canvas-wrap canvas {
-      width: 100%;
-      height: auto;
-      touch-action: none;
-    }
+    .pip-media-frame canvas { touch-action: none; }
   </style>
 </head>
 <body>
@@ -27,7 +17,7 @@
       <div class="pip-help"></div>
       <div class="pip-stage" id="ex16-stage">
         <div class="pip-controls" id="ex16-controls"></div>
-        <div class="ex16-canvas-wrap">
+        <div class="pip-media-frame">
           <canvas id="ex16-canvas" width="820" height="620"></canvas>
         </div>
       </div>

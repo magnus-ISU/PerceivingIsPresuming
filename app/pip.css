@@ -76,33 +76,71 @@ main {
   flex-direction: column;
   gap: 0.75rem;
   align-items: stretch;
+  /* Stage fills the viewport-tall column so the media frame can grow to
+     fill the space that the header, controls and footer don't use. */
+  min-height: calc(100vh - 12rem);
 }
 
-.pip-stage > .pip-controls {
+.pip-stage > .pip-controls,
+.pip-stage > .pip-sliders {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 0.75rem;
   align-items: center;
+  flex: 0 0 auto;
+}
+.pip-stage > .pip-sliders {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
 }
 
-.pip-stage video,
-.pip-stage img,
-.pip-stage canvas,
-.pip-stage iframe {
-  display: block;
+/* The media frame is a sized placeholder that reserves space for one or
+   more overlapping media elements. Its size never changes when individual
+   media inside it show or hide, so toggling controls never reflows the
+   document. Children share the frame's box via absolute positioning. */
+.pip-media-frame {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 12rem;
   width: 100%;
-  height: auto;
-  margin: 0 auto;
   background: #000;
-  min-width: 0;
+  border-radius: 4px;
+  overflow: hidden;
 }
-.pip-stage video,
-.pip-stage img,
-.pip-stage canvas,
-.pip-stage iframe {
-  max-width: min(100%, var(--pip-media-max, 720px));
+.pip-media-frame > video,
+.pip-media-frame > img,
+.pip-media-frame > canvas,
+.pip-media-frame > iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+
+/* Standalone media (not inside a frame) still grows to fill the stage. */
+.pip-stage > video,
+.pip-stage > img,
+.pip-stage > canvas,
+.pip-stage > iframe {
+  display: block;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
 }
 .pip-stage [hidden] { display: none !important; }
+.pip-media-frame > [hidden] {
+  /* Hidden media inside a frame is invisible but keeps participating in
+     the frame's box so the placeholder size stays constant. */
+  display: block !important;
+  visibility: hidden;
+}
 
 .pip-instructions {
   grid-area: instructions;
@@ -202,7 +240,8 @@ main {
   align-items: center;
   gap: 0.6rem;
   font-size: 0.9rem;
-  padding: 0.25rem 0;
+  padding: 0;
+  min-height: 1.75rem;
 }
 .pip-slider label {
   color: var(--muted);
@@ -271,7 +310,11 @@ main {
   font-size: clamp(1.1rem, 2.5vw, 1.5rem);
   color: var(--accent-bright);
   margin: 0.25rem 0;
+  /* Always reserve a single line of vertical space so toggling Show Words
+     on and off doesn't shift the controls below it. */
+  min-height: 1.5em;
 }
+.pip-words-empty { visibility: hidden; }
 
 kbd {
   background: rgba(255, 255, 255, 0.1);
@@ -297,4 +340,14 @@ kbd {
     gap: 0.25rem;
   }
   .pip-slider output { text-align: left; }
+  /* On phone-sized viewports the controls become the main thing the user
+     interacts with, so the media gets a more aggressive cap to keep
+     everything above the fold. Individual examples may override
+     --pip-media-max-h-mobile when their controls are smaller. */
+  .pip-stage video,
+  .pip-stage img,
+  .pip-stage canvas,
+  .pip-stage iframe {
+    max-height: var(--pip-media-max-h-mobile, 38vh);
+  }
 }

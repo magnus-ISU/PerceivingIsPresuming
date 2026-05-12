@@ -13,14 +13,18 @@
 
 function pipMcgurkSketch(config) {
   const stage = document.querySelector(".pip-stage");
+  const frame = document.createElement("div");
+  frame.className = "pip-media-frame";
   const controls = document.createElement("div");
   controls.className = "pip-controls";
 
   const wordsEl = document.createElement("p");
-  wordsEl.className = "pip-words";
-  wordsEl.hidden = true;
+  wordsEl.className = "pip-words pip-words-empty";
+  wordsEl.textContent = " ";  //non-breaking space holds the line height
 
-  //Build a video + audio pair per speaker, all hidden by default.
+  //Build a video + audio pair per speaker. All videos live in the same
+  //placeholder frame and overlap each other; hidden ones become invisible
+  //but the frame keeps the same size, so toggling never reflows anything.
   const speakers = config.speakers.map((s) => {
     const video = document.createElement("video");
     video.src = s.video;
@@ -37,7 +41,8 @@ function pipMcgurkSketch(config) {
     aWrong.preload = "auto";
     return { video, aCorrect, aWrong, name: s.name };
   });
-  speakers.forEach((s) => stage.appendChild(s.video));
+  speakers.forEach((s) => frame.appendChild(s.video));
+  stage.appendChild(frame);
   stage.appendChild(wordsEl);
   stage.appendChild(controls);
 
@@ -61,10 +66,11 @@ function pipMcgurkSketch(config) {
   }
   function refreshWords() {
     if (!isRunning || !toggleShowWords.checked) {
-      wordsEl.hidden = true;
+      wordsEl.classList.add("pip-words-empty");
+      wordsEl.textContent = " ";
       return;
     }
-    wordsEl.hidden = false;
+    wordsEl.classList.remove("pip-words-empty");
     wordsEl.textContent = correctAudio ? config.words[1] : config.words[0];
   }
   function startSpeaker(i) {
@@ -93,8 +99,10 @@ function pipMcgurkSketch(config) {
       } else {
         stopSpeaker(currentSpeaker);
       }
-      rotateSpeaker.style.display = on ? "none" : "";
-      runOnlyGroup.style.display = on ? "" : "none";
+      //All controls stay in the DOM at all times; only their disabled
+      //state changes so the document doesn't reflow on Run toggle.
+      rotateSpeaker.disabled = on;
+      [toggleShowVideo, toggleShowWords, buttonChangeAudio, buttonRestart].forEach((b) => b.disabled = !on);
       refreshVolumes();
       refreshVisibility();
       refreshWords();
@@ -142,12 +150,10 @@ function pipMcgurkSketch(config) {
     },
   });
 
-  const runOnlyGroup = document.createElement("div");
-  runOnlyGroup.style.display = "none";
-  runOnlyGroup.className = "pip-controls";
-  runOnlyGroup.append(toggleShowVideo, toggleShowWords, buttonChangeAudio, buttonRestart);
-
-  controls.append(toggleRun, rotateSpeaker, runOnlyGroup);
+  //All controls are added once. Disabled state changes — not visibility —
+  //communicates which ones are active for the current Run state.
+  [toggleShowVideo, toggleShowWords, buttonChangeAudio, buttonRestart].forEach((b) => b.disabled = true);
+  controls.append(toggleRun, rotateSpeaker, toggleShowVideo, toggleShowWords, buttonChangeAudio, buttonRestart);
 
   refreshVisibility();
   refreshVolumes();

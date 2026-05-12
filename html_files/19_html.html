@@ -7,12 +7,6 @@
   <link rel="stylesheet" href="../app/pip.css">
   <script src="../app/pip.js" defer></script>
   <style>
-    .ex19-frame {
-      width: 100%;
-      max-width: 720px;
-      aspect-ratio: 4 / 3;
-      object-fit: contain;
-    }
     .ex19-frame-num {
       color: var(--accent);
       font-variant-numeric: tabular-nums;
@@ -28,7 +22,9 @@
       <h1 class="pip-title">Example 19: Hollow Face 2</h1>
       <div class="pip-help"></div>
       <div class="pip-stage">
-        <img id="ex19-frame" class="ex19-frame" alt="Hollow face frame">
+        <div class="pip-media-frame">
+          <img id="ex19-frame" alt="Hollow face frame">
+        </div>
         <div class="pip-controls" id="ex19-controls"></div>
       </div>
       <aside class="pip-instructions">

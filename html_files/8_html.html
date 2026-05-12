@@ -30,15 +30,19 @@
     document.addEventListener("DOMContentLoaded", () => {
       const stage = document.getElementById("ex8-stage");
       const W = 420, H = 420;
+      const frame = document.createElement("div");
+      frame.className = "pip-media-frame";
       const canvas = document.createElement("canvas");
       canvas.width = W; canvas.height = H;
       const ctx = canvas.getContext("2d");
-      stage.appendChild(canvas);
+      frame.appendChild(canvas);
+      stage.appendChild(frame);
 
       const controls = document.createElement("div");
       controls.className = "pip-controls";
       stage.appendChild(controls);
       const sliderHost = document.createElement("div");
+      sliderHost.className = "pip-sliders";
       stage.appendChild(sliderHost);
 
       const clicks = [0,1,2,3,4,5].map((i) => {

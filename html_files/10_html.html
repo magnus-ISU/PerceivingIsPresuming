@@ -29,6 +29,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const stage = document.getElementById("ex10-stage");
+      const frame = document.createElement("div");
+      frame.className = "pip-media-frame";
+      stage.appendChild(frame);
       const sentences = [0, 1, 2].map((i) => {
         const v = document.createElement("video");
         v.src = `../assets/10_noise${i}.mp4`;
@@ -38,7 +41,7 @@
         v.hidden = true;
         return v;
       });
-      sentences.forEach((v) => stage.appendChild(v));
+      sentences.forEach((v) => frame.appendChild(v));
 
       //Synthetic white noise played through a low-pass filter, looping.
       //Audio context is created lazily on first user gesture (Run).
@@ -130,6 +133,7 @@
 
       controls.append(toggleRun, toggleShowVideo, rotateSentence);
       const sliders = document.createElement("div");
+      sliders.className = "pip-sliders";
       sliders.append(sliderNoise, sliderVoice);
       stage.appendChild(sliders);
 
