@@ -33,17 +33,15 @@
       frame.className = "pip-media-frame";
       stage.appendChild(frame);
       const labels = ["Move", "Exchange", "Obama"];
-      const videos = labels.map((_, i) => {
-        const v = document.createElement("video");
-        v.src = `../assets/17_${i}shepard.mp4`;
-        v.loop = true;
-        v.playsInline = true;
-        v.preload = "auto";
-        v.playbackRate = 2;
-        v.hidden = true;
-        return v;
-      });
-      videos.forEach((v) => frame.appendChild(v));
+      const sources = labels.map((_, i) => `../assets/17_${i}shepard.mp4`);
+      //One persistent video element. Switching selectors changes its src,
+      //so the media frame always reserves space and never reflows.
+      const video = document.createElement("video");
+      video.loop = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.playbackRate = 2;
+      frame.appendChild(video);
 
       const controls = document.createElement("div");
       controls.className = "pip-controls";
@@ -51,44 +49,76 @@
 
       let isRunning = false;
       let whichVideo = 1;
+      video.src = sources[whichVideo];
 
-      function updateVisibility() {
-        videos.forEach((v, i) => { v.hidden = i !== whichVideo; });
+      function selectVideo(i) {
+        if (i === whichVideo) return;
+        const wasPlaying = !video.paused;
+        video.pause();
+        whichVideo = i;
+        video.src = sources[i];
+        if (wasPlaying) {
+          video.currentTime = 0;
+          video.play().catch(() => {});
+        }
       }
+
+      //Three explicit, mutually-exclusive video selectors. Each button
+      //directly selects its video; the currently-selected one shows as
+      //pressed via aria-pressed and the active toggle background.
+      const helpText = [
+        "show the video where one tabletop moves onto the other to prove their tops are identical",
+        "show the video that swaps the two tabletops, demonstrating their interchangeable shape",
+        "show the 'Obama' variant that overlays the tabletops onto a face for size comparison",
+      ];
+      const selectorButtons = labels.map((label, i) => {
+        const btn = pipToggle({
+          label,
+          defaultOn: i === whichVideo,
+          help: helpText[i],
+          onChange: () => {
+            if (whichVideo === i) {
+              btn.setAttribute("aria-pressed", "true");
+              return;
+            }
+            selectorButtons.forEach((b, j) => {
+              if (j !== i) b.setAttribute("aria-pressed", "false");
+            });
+            selectVideo(i);
+          },
+        });
+        return btn;
+      });
+
       const toggleRun = pipToggle({
         label: "Run", help: "play or pause the demonstration video",
         onChange: (on) => {
           isRunning = on;
-          videos.forEach((v, i) => {
-            if (i === whichVideo && on) {
-              v.currentTime = 0; v.play().catch(() => {});
-            } else {
-              v.pause();
-            }
-          });
-          //Keep the video selector in the layout; disable while running.
-          rotateSelect.disabled = on;
-        },
-      });
-      const rotateSelect = pipRotate({
-        items: labels, defaultIndex: 1,
-        help: "click to switch which video plays",
-        onChange: (i) => {
-          videos[whichVideo].pause();
-          whichVideo = i;
-          updateVisibility();
+          if (on) {
+            video.currentTime = 0;
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+          selectorButtons.forEach((b) => b.disabled = on);
         },
       });
       const reset = pipButton({
         label: "Reset", help: "stop playback and rewind",
         onClick: () => {
-          videos.forEach((v) => { v.pause(); v.currentTime = 0; });
+          video.pause();
+          video.currentTime = 0;
           toggleRun._reset();
         },
       });
 
-      controls.append(toggleRun, rotateSelect, reset);
-      updateVisibility();
+      controls.append(toggleRun, reset);
+      const selectorRow = document.createElement("div");
+      selectorRow.className = "pip-controls";
+      selectorRow.setAttribute("role", "radiogroup");
+      selectorRow.setAttribute("aria-label", "Video selector");
+      selectorButtons.forEach((b) => selectorRow.appendChild(b));
+      stage.appendChild(selectorRow);
     });
   </script>
 </body>

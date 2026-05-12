@@ -2,14 +2,19 @@
 //
 //Each example provides a list of speakers, each with a video, a "correct"
 //audio track, and a "wrong" (illusion) audio track, plus the two possible
-//word-overlay strings. This module wires up the standard McGurk control
-//layout: Run, Show Video, Show Words, Change Audio, Restart, and a
-//Speaker selector (only visible when not running).
+//word-overlay strings.
+//
+//Layout invariant: a single <video> element lives inside a sized media
+//frame whose dimensions are determined by CSS aspect-ratio. We never
+//show/hide or replace the video element itself — we swap its `src` when
+//the speaker changes and toggle visibility with opacity when Show Video
+//is turned off. Audio for each speaker lives in separate Audio objects so
+//the wrong/correct tracks can be cross-faded without retriggering loads.
 //
 //config:
 //  speakers: [{ name, video, correctAudio, wrongAudio }, ...]
 //  words:    [wrongLabel, correctLabel]
-//  showVideoDefault: boolean (default true)
+//  defaultSpeaker: optional index, default 0
 
 function pipMcgurkSketch(config) {
   const stage = document.querySelector(".pip-stage");
@@ -18,51 +23,54 @@ function pipMcgurkSketch(config) {
   const controls = document.createElement("div");
   controls.className = "pip-controls";
 
+  //One persistent video element. Its src changes when the speaker changes;
+  //its visibility (opacity) changes when Show Video is toggled.
+  const video = document.createElement("video");
+  video.loop = true;
+  video.playsInline = true;
+  video.preload = "auto";
+  video.muted = true;  //audio comes from the separate Audio objects
+  frame.appendChild(video);
+
   const wordsEl = document.createElement("p");
   wordsEl.className = "pip-words pip-words-empty";
-  wordsEl.textContent = " ";  //non-breaking space holds the line height
+  wordsEl.textContent = " ";
 
-  //Build a video + audio pair per speaker. All videos live in the same
-  //placeholder frame and overlap each other; hidden ones become invisible
-  //but the frame keeps the same size, so toggling never reflows anything.
-  const speakers = config.speakers.map((s) => {
-    const video = document.createElement("video");
-    video.src = s.video;
-    video.loop = true;
-    video.playsInline = true;
-    video.preload = "auto";
-    video.muted = true;  //audio comes from the separate audio elements
-    video.hidden = true;
-    const aCorrect = new Audio(s.correctAudio);
-    aCorrect.loop = true;
-    aCorrect.preload = "auto";
-    const aWrong = new Audio(s.wrongAudio);
-    aWrong.loop = true;
-    aWrong.preload = "auto";
-    return { video, aCorrect, aWrong, name: s.name };
-  });
-  speakers.forEach((s) => frame.appendChild(s.video));
+  //Pre-create per-speaker audio elements so each pair stays loaded.
+  const audios = config.speakers.map((s) => ({
+    aCorrect: Object.assign(new Audio(s.correctAudio), { loop: true, preload: "auto" }),
+    aWrong:   Object.assign(new Audio(s.wrongAudio),   { loop: true, preload: "auto" }),
+  }));
+
   stage.appendChild(frame);
   stage.appendChild(wordsEl);
   stage.appendChild(controls);
 
   let isRunning = false;
-  let correctAudio = false;       //false → wrong (illusion) audio is dominant
-  let currentSpeaker = 0;
-  const showVideoDefault = config.showVideoDefault !== false;
+  let correctAudio = false;  //false → "wrong" (illusion) audio is dominant
+  let currentSpeaker = config.defaultSpeaker || 0;
+
+  function setSpeakerSrc(i) {
+    const src = config.speakers[i].video;
+    if (video.getAttribute("src") !== src) {
+      const wasPlaying = !video.paused;
+      video.src = src;
+      if (wasPlaying) video.play().catch(() => {});
+    }
+  }
+  setSpeakerSrc(currentSpeaker);
 
   function refreshVolumes() {
-    speakers.forEach((s, i) => {
+    audios.forEach((a, i) => {
       const active = i === currentSpeaker && isRunning;
-      s.aCorrect.volume = active && correctAudio ? 1 : 0;
-      s.aWrong.volume = active && !correctAudio ? 1 : 0;
+      a.aCorrect.volume = active && correctAudio ? 1 : 0;
+      a.aWrong.volume   = active && !correctAudio ? 1 : 0;
     });
   }
-  function refreshVisibility() {
-    speakers.forEach((s, i) => {
-      const shouldShow = isRunning && i === currentSpeaker && toggleShowVideo.checked;
-      s.video.hidden = !shouldShow;
-    });
+  function refreshVideoVisibility() {
+    //Visibility toggles via opacity (not display), so the video element
+    //always takes the same space inside the frame.
+    video.style.opacity = (isRunning && toggleShowVideo.checked) ? "1" : "0";
   }
   function refreshWords() {
     if (!isRunning || !toggleShowWords.checked) {
@@ -73,46 +81,38 @@ function pipMcgurkSketch(config) {
     wordsEl.classList.remove("pip-words-empty");
     wordsEl.textContent = correctAudio ? config.words[1] : config.words[0];
   }
-  function startSpeaker(i) {
-    const s = speakers[i];
-    s.video.currentTime = 0;
-    s.aCorrect.currentTime = 0;
-    s.aWrong.currentTime = 0;
-    Promise.allSettled([s.video.play(), s.aCorrect.play(), s.aWrong.play()]);
+  function startCurrent() {
+    video.currentTime = 0;
+    const a = audios[currentSpeaker];
+    a.aCorrect.currentTime = 0;
+    a.aWrong.currentTime = 0;
+    Promise.allSettled([video.play(), a.aCorrect.play(), a.aWrong.play()]);
   }
-  function stopSpeaker(i) {
-    const s = speakers[i];
-    s.video.pause();
-    s.video.currentTime = 0;
-    s.aCorrect.pause();
-    s.aCorrect.currentTime = 0;
-    s.aWrong.pause();
-    s.aWrong.currentTime = 0;
+  function stopCurrent() {
+    video.pause();
+    video.currentTime = 0;
+    const a = audios[currentSpeaker];
+    a.aCorrect.pause(); a.aCorrect.currentTime = 0;
+    a.aWrong.pause();   a.aWrong.currentTime = 0;
   }
 
   const toggleRun = pipToggle({
     label: "Run", help: "click to start or stop playback",
     onChange: (on) => {
       isRunning = on;
-      if (on) {
-        startSpeaker(currentSpeaker);
-      } else {
-        stopSpeaker(currentSpeaker);
-      }
-      //All controls stay in the DOM at all times; only their disabled
-      //state changes so the document doesn't reflow on Run toggle.
+      if (on) startCurrent(); else stopCurrent();
       rotateSpeaker.disabled = on;
       [toggleShowVideo, toggleShowWords, buttonChangeAudio, buttonRestart].forEach((b) => b.disabled = !on);
       refreshVolumes();
-      refreshVisibility();
+      refreshVideoVisibility();
       refreshWords();
     },
   });
 
   const toggleShowVideo = pipToggle({
-    label: "Show Video", defaultOn: showVideoDefault,
+    label: "Show Video", defaultOn: config.showVideoDefault !== false,
     help: "show or hide the speaker's video",
-    onChange: refreshVisibility,
+    onChange: refreshVideoVisibility,
   });
 
   const toggleShowWords = pipToggle({
@@ -134,28 +134,26 @@ function pipMcgurkSketch(config) {
   const buttonRestart = pipButton({
     label: "Restart",
     help: "rewind the video and audio if they drift apart",
-    onClick: () => {
-      if (isRunning) startSpeaker(currentSpeaker);
-    },
+    onClick: () => { if (isRunning) startCurrent(); },
   });
 
   const rotateSpeaker = pipRotate({
     items: config.speakers.map((s) => s.name),
-    defaultIndex: config.defaultSpeaker || 0,
+    defaultIndex: currentSpeaker,
     help: "click to change which speaker is shown",
     onChange: (i) => {
-      stopSpeaker(currentSpeaker);
+      stopCurrent();
       currentSpeaker = i;
-      refreshVisibility();
+      setSpeakerSrc(i);
+      refreshVolumes();
+      refreshVideoVisibility();
     },
   });
 
-  //All controls are added once. Disabled state changes — not visibility —
-  //communicates which ones are active for the current Run state.
   [toggleShowVideo, toggleShowWords, buttonChangeAudio, buttonRestart].forEach((b) => b.disabled = true);
   controls.append(toggleRun, rotateSpeaker, toggleShowVideo, toggleShowWords, buttonChangeAudio, buttonRestart);
 
-  refreshVisibility();
+  refreshVideoVisibility();
   refreshVolumes();
   refreshWords();
 }

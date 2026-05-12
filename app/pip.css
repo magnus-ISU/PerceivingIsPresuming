@@ -98,11 +98,18 @@ main {
 /* The media frame is a sized placeholder that reserves space for one or
    more overlapping media elements. Its size never changes when individual
    media inside it show or hide, so toggling controls never reflows the
-   document. Children share the frame's box via absolute positioning. */
+   document. Children share the frame's box via absolute positioning.
+   An explicit aspect-ratio guarantees the frame has a real height even
+   when no media is currently visible inside it — so the controls below
+   it stay put across every state change. */
 .pip-media-frame {
   position: relative;
   flex: 1 1 0;
-  min-height: 12rem;
+  /* Reserve real height even when no media is visible inside. Flex-grow
+     makes the frame fill the rest of the stage; min-height guarantees a
+     sensible baseline on short viewports. The frame's size never changes
+     based on its children (they are all absolute-positioned). */
+  min-height: max(16rem, 40vh);
   width: 100%;
   background: #000;
   border-radius: 4px;
@@ -233,6 +240,21 @@ main {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Rotate-button label stack: every option occupies the same grid cell so
+   the button is sized to fit the widest label, and clicking through the
+   options never changes the button width. */
+.pip-rotate-stack {
+  display: inline-grid;
+  align-items: center;
+  justify-items: start;
+}
+.pip-rotate-label {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  visibility: hidden;
+}
+.pip-rotate-label.pip-rotate-active { visibility: visible; }
 
 .pip-slider {
   display: grid;

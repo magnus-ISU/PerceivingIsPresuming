@@ -32,16 +32,13 @@
       const frame = document.createElement("div");
       frame.className = "pip-media-frame";
       stage.appendChild(frame);
-      const sentences = [0, 1, 2].map((i) => {
-        const v = document.createElement("video");
-        v.src = `../assets/10_noise${i}.mp4`;
-        v.loop = true;
-        v.playsInline = true;
-        v.preload = "auto";
-        v.hidden = true;
-        return v;
-      });
-      sentences.forEach((v) => frame.appendChild(v));
+      const sentenceSrcs = [0, 1, 2].map((i) => `../assets/10_noise${i}.mp4`);
+      //One persistent video; src changes when the sentence selector cycles.
+      const video = document.createElement("video");
+      video.loop = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      frame.appendChild(video);
 
       //Synthetic white noise played through a low-pass filter, looping.
       //Audio context is created lazily on first user gesture (Run).
@@ -67,6 +64,7 @@
 
       let isRunning = false;
       let sentenceIdx = 0;
+      video.src = sentenceSrcs[sentenceIdx];
       const controls = document.createElement("div");
       controls.className = "pip-controls";
       stage.appendChild(controls);
@@ -81,7 +79,7 @@
         label: "Voice volume", min: 0, max: 1, step: 0.01, value: 0.15,
         help: "loudness of the speaker's voice",
         format: (v) => Math.round(v * 100) + "%",
-        onChange: (v) => { sentences[sentenceIdx].volume = v; },
+        onChange: (v) => { video.volume = v; },
       });
 
       const toggleShowVideo = pipToggle({
@@ -90,9 +88,9 @@
         onChange: () => updateVisibility(),
       });
       function updateVisibility() {
-        sentences.forEach((v, i) => {
-          v.hidden = !(isRunning && i === sentenceIdx && toggleShowVideo.checked);
-        });
+        //Toggle visibility via opacity, never display, so the frame size
+        //is stable across every state change.
+        video.style.opacity = (isRunning && toggleShowVideo.checked) ? "1" : "0";
       }
 
       const toggleRun = pipToggle({
@@ -103,12 +101,13 @@
           if (on) {
             ensureNoise();
             audioCtx.resume();
-            sentences[sentenceIdx].volume = sliderVoice.value;
-            sentences[sentenceIdx].currentTime = 0;
-            sentences[sentenceIdx].play().catch(() => {});
+            video.volume = sliderVoice.value;
+            video.currentTime = 0;
+            video.play().catch(() => {});
             noiseGain.gain.value = sliderNoise.value;
           } else {
-            sentences.forEach((v) => { v.pause(); v.currentTime = 0; });
+            video.pause();
+            video.currentTime = 0;
             if (noiseGain) noiseGain.gain.value = 0;
             toggleShowVideo._reset();
           }
@@ -120,13 +119,13 @@
         items: ["Sentence 1", "Sentence 2", "Sentence 3"],
         help: "pick which sentence is being spoken",
         onChange: (i) => {
-          //Reset run state when speaker changes — matches the original behavior.
           if (isRunning) {
-            sentences[sentenceIdx].pause();
-            sentences[sentenceIdx].currentTime = 0;
+            video.pause();
+            video.currentTime = 0;
             toggleRun._reset();
           }
           sentenceIdx = i;
+          video.src = sentenceSrcs[sentenceIdx];
           updateVisibility();
         },
       });

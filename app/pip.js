@@ -148,13 +148,27 @@ function pipButton({ label, help, onClick }) {
 }
 
 //A rotate button: cycles through a list of labels each click.
+//All option labels are rendered in the same grid cell so the button width
+//is the max-content of every option, which prevents the button (and every
+//element after it on the row) from shifting when the user cycles through.
 function pipRotate({ items, defaultIndex = 0, help, onChange }) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "pip-rotate";
+  const stack = document.createElement("span");
+  stack.className = "pip-rotate-stack";
+  const labels = items.map((item, i) => {
+    const s = document.createElement("span");
+    s.className = "pip-rotate-label";
+    s.textContent = `▸ ${item}`;
+    s.dataset.i = String(i);
+    stack.appendChild(s);
+    return s;
+  });
+  btn.appendChild(stack);
   let index = defaultIndex;
   const render = () => {
-    btn.textContent = `▸ ${items[index]}`;
+    labels.forEach((s, i) => s.classList.toggle("pip-rotate-active", i === index));
   };
   render();
   if (help) pipHelp(btn, help);
