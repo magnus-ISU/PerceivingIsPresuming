@@ -14,8 +14,9 @@
       <div class="pip-help"></div>
       <div class="pip-stage">
         <div class="pip-media-frame">
-          <video controls preload="metadata" src="../assets/12_amesRoom_1.mp4"></video>
+          <video id="ex12-video" controls preload="metadata" src="../assets/12_amesRoom_1.mp4"></video>
         </div>
+        <div class="pip-controls" id="ex12-controls"></div>
       </div>
       <aside class="pip-instructions">
         <h2 class="pip-instructions-title">Instructions</h2>
@@ -23,11 +24,75 @@
           <li>Watch the video to see two people of similar height appear dramatically different in size.</li>
           <li>The Ames Room is a forced-perspective interior — the back wall is actually a trapezoid, and one corner is much closer to the camera than it appears.</li>
           <li>Even after learning how the trick works, the size illusion persists.</li>
+          <li>Drag the seek slider below the video to jump to any point.</li>
         </ol>
         <p class="pip-nav-note">Click Home to return to the examples list.</p>
       </aside>
       <nav class="pip-nav"></nav>
     </div>
   </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const video = document.getElementById("ex12-video");
+      const controls = document.getElementById("ex12-controls");
+
+      const playToggle = pipToggle({
+        label: "Play", help: "play or pause the video",
+        onChange: (on) => { on ? video.play().catch(() => {}) : video.pause(); },
+      });
+      video.addEventListener("play",  () => playToggle.setAttribute("aria-pressed", "true"));
+      video.addEventListener("pause", () => playToggle.setAttribute("aria-pressed", "false"));
+
+      //Always-visible seek slider built directly so its data flow is simple:
+      //  - "input" event = user dragged → write to video.currentTime
+      //  - "timeupdate" from video → write to slider.value (when user isn't dragging)
+      //A userSeeking flag prevents the two from fighting during a drag.
+      const seekWrap = document.createElement("label");
+      seekWrap.className = "pip-slider";
+      const seekName = document.createElement("span");
+      seekName.textContent = "Seek";
+      const seekInput = document.createElement("input");
+      seekInput.type = "range";
+      seekInput.min = "0";
+      seekInput.max = "1000";
+      seekInput.step = "1";
+      seekInput.value = "0";
+      const seekOut = document.createElement("output");
+      seekOut.textContent = "0:00";
+      seekWrap.append(seekName, seekInput, seekOut);
+
+      function fmt(t) {
+        if (!Number.isFinite(t)) return "0:00";
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+      }
+
+      let userSeeking = false;
+      seekInput.addEventListener("pointerdown", () => { userSeeking = true; });
+      seekInput.addEventListener("pointerup",   () => { userSeeking = false; });
+      seekInput.addEventListener("pointercancel", () => { userSeeking = false; });
+
+      seekInput.addEventListener("input", () => {
+        if (!video.duration || !Number.isFinite(video.duration)) return;
+        const ratio = Number(seekInput.value) / 1000;
+        video.currentTime = ratio * video.duration;
+        seekOut.textContent = fmt(video.currentTime);
+      });
+
+      function syncFromVideo() {
+        if (!video.duration || !Number.isFinite(video.duration)) return;
+        if (!userSeeking) {
+          seekInput.value = String(Math.round((video.currentTime / video.duration) * 1000));
+        }
+        seekOut.textContent = fmt(video.currentTime);
+      }
+      video.addEventListener("timeupdate",     syncFromVideo);
+      video.addEventListener("loadedmetadata", syncFromVideo);
+      video.addEventListener("durationchange", syncFromVideo);
+
+      controls.append(playToggle, seekWrap);
+    });
+  </script>
 </body>
 </html>

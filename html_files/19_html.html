@@ -3,38 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Example 19: Hollow Face 2</title>
+  <title>Example 19: Chess</title>
   <link rel="stylesheet" href="../app/pip.css">
   <script src="../app/pip.js" defer></script>
-  <style>
-    .ex19-frame-num {
-      color: var(--accent);
-      font-variant-numeric: tabular-nums;
-      min-width: 8ch;
-      text-align: center;
-      font-weight: 600;
-    }
-  </style>
 </head>
 <body>
   <main>
     <div class="pip-layout" data-example="19">
-      <h1 class="pip-title">Example 19: Hollow Face 2</h1>
+      <h1 class="pip-title">Example 19: Chess</h1>
       <div class="pip-help"></div>
       <div class="pip-stage">
         <div class="pip-media-frame">
-          <img id="ex19-frame" alt="Hollow face frame">
+          <img id="ex19-still" src="../assets/20_chessStill.png" alt="Still chess board with two pieces">
+          <video id="ex19-vid" hidden playsinline preload="metadata"></video>
         </div>
-        <div class="pip-controls" id="ex19-controls"></div>
+        <div class="pip-controls" id="ex19-controls" style="justify-content: center;"></div>
       </div>
       <aside class="pip-instructions">
         <h2 class="pip-instructions-title">Instructions</h2>
         <ol>
-          <li>Click anywhere on the page so it has keyboard focus.</li>
-          <li>Hold the <kbd>a</kbd> key (or the matching button) to advance the rotation forward until the painted side first appears.</li>
-          <li>Tap <kbd>a</kbd> to advance one frame at a time, stopping when the mask first looks convex.</li>
-          <li>Tap <kbd>d</kbd> (or the back button) to reverse one frame at a time until it looks concave again.</li>
-          <li>Note the frame number where the mask first looks convex — that's where your visual prior takes over.</li>
+          <li>The two chess pieces look like very different colors.</li>
+          <li>Click <strong>Play animation</strong> to watch a video that makes the pieces' true colors clear.</li>
+          <li>Click again to see a second video, then once more to return to the still image.</li>
         </ol>
         <p class="pip-nav-note">Click Home to return to the examples list.</p>
       </aside>
@@ -43,68 +33,37 @@
   </main>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const FIRST = 1000;
-      const LAST = 1347;
-      //Frames 1000-1299 live in assets/e/, 1300-1347 live in assets/.
-      const frameUrl = (n) =>
-        n <= 1299 ? `../assets/e/HollowFaceLoop_${n}.jpg`
-                  : `../assets/HollowFaceLoop_${n}.jpg`;
-
-      const img = document.getElementById("ex19-frame");
+      const still = document.getElementById("ex19-still");
+      const vid = document.getElementById("ex19-vid");
       const controls = document.getElementById("ex19-controls");
-      let frame = FIRST;
-      let holdTimer = null;
+      const states = [
+        { show: "still",                                     nextLabel: "Play animation" },
+        { show: "vid", src: "../assets/20_chessVid1.mp4",    nextLabel: "Play alternate animation" },
+        { show: "vid", src: "../assets/20_chessVid2.mp4",    nextLabel: "Return to still image" },
+      ];
+      let i = 0;
+      const btn = pipButton({ label: states[0].nextLabel, help: "advance to the next view" });
+      controls.appendChild(btn);
 
-      const num = document.createElement("span");
-      num.className = "ex19-frame-num";
-      const back = pipButton({
-        label: "◂ d",
-        help: "step back one frame (or press d)",
-      });
-      const fwd = pipButton({
-        label: "a ▸",
-        help: "step forward one frame (or press a)",
-      });
-      controls.append(back, num, fwd);
-
-      function render() {
-        img.src = frameUrl(frame);
-        num.textContent = `frame ${frame}`;
-      }
-      function step(delta) {
-        frame = Math.max(FIRST, Math.min(LAST, frame + delta));
-        render();
-      }
-      function startHold(delta) {
-        stopHold();
-        step(delta);
-        holdTimer = setInterval(() => step(delta), 80);
-      }
-      function stopHold() {
-        if (holdTimer) clearInterval(holdTimer);
-        holdTimer = null;
-      }
-      fwd.addEventListener("pointerdown", (e) => { startHold(1); e.preventDefault(); });
-      back.addEventListener("pointerdown", (e) => { startHold(-1); e.preventDefault(); });
-      document.addEventListener("pointerup", stopHold);
-      document.addEventListener("pointercancel", stopHold);
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "a") { step(1); e.preventDefault(); }
-        else if (e.key === "d") { step(-1); e.preventDefault(); }
-      });
-
-      function preloadAround(center) {
-        for (let i = -3; i <= 3; i++) {
-          const n = center + i;
-          if (n >= FIRST && n <= LAST) {
-            const pre = new Image();
-            pre.src = frameUrl(n);
-          }
+      function apply() {
+        const cur = states[i];
+        btn.textContent = cur.nextLabel;
+        if (cur.show === "still") {
+          vid.pause();
+          vid.hidden = true;
+          vid.removeAttribute("src");
+          vid.load();
+          still.hidden = false;
+        } else {
+          still.hidden = true;
+          if (vid.getAttribute("src") !== cur.src) vid.src = cur.src;
+          vid.hidden = false;
+          vid.loop = true;
+          vid.play().catch(() => {});
         }
       }
-      preloadAround(FIRST);
-      render();
+      btn.addEventListener("click", () => { i = (i + 1) % states.length; apply(); });
+      apply();
     });
   </script>
 </body>

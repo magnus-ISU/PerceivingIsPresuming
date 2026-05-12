@@ -3,29 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Example 1: Hollow Face 1</title>
+  <title>Example 1: Hollow Face</title>
   <link rel="stylesheet" href="../app/pip.css">
   <script src="../app/pip.js" defer></script>
+  <style>
+    .ex1-frame-num {
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      min-width: 8ch;
+      text-align: center;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
   <main>
     <div class="pip-layout" data-example="1">
-      <h1 class="pip-title">Example 1: Hollow Face 1</h1>
+      <h1 class="pip-title">Example 1: Hollow Face</h1>
       <div class="pip-help"></div>
       <div class="pip-stage">
         <div class="pip-media-frame">
-          <video id="ex1-video" src="../assets/1_HollowFaceLoop2.mp4" loop playsinline preload="metadata" width="532" height="600"></video>
+          <video id="ex1-video" src="../assets/1_HollowFaceLoop2.mp4" loop playsinline preload="metadata"></video>
+          <img id="ex1-frame" hidden alt="Hollow face frame">
         </div>
         <div class="pip-controls" id="ex1-controls"></div>
       </div>
       <aside class="pip-instructions">
         <h2 class="pip-instructions-title">Instructions</h2>
         <ol>
-          <li>Click <strong>Run</strong> to watch the mask rotate. Click again at any point to pause; click again to resume.</li>
+          <li>In <strong>auto-play</strong> mode, click Run to watch the mask rotate. Adjust the speed slider to see whether playback speed changes your experience.</li>
           <li>Notice that the painted (concave) side of the mask often looks convex, even though it's facing away.</li>
-          <li>Use the <strong>speed</strong> slider to see whether playback speed changes your experience.</li>
+          <li>Switch to <strong>manual</strong> mode to step through the rotation one frame at a time. Tap <kbd>a</kbd> (or the matching button) to advance, <kbd>d</kbd> to reverse.</li>
+          <li>Identify the frame where the mask first switches from concave to convex — that's where your visual prior takes over.</li>
         </ol>
-        <p class="pip-nav-note">Click Home to return to the examples list. Open the example menu below to jump to any other demo.</p>
+        <p class="pip-nav-note">Click Home to return to the examples list.</p>
       </aside>
       <nav class="pip-nav"></nav>
     </div>
@@ -33,27 +44,116 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const video = document.getElementById("ex1-video");
+      const img = document.getElementById("ex1-frame");
       const controls = document.getElementById("ex1-controls");
-      const runToggle = pipToggle({
-        label: "Run", help: "click to start or pause the rotation",
-        onChange: (on) => { on ? video.play() : video.pause(); },
+
+      //Frame-step mode uses the same hollow-face rotation as the auto-play
+      //video, just sourced from individual JPEGs so users can scrub.
+      //Frames 1000-1299 live in assets/e/, 1300-1347 live in assets/.
+      const FIRST = 1000;
+      const LAST = 1347;
+      const frameUrl = (n) =>
+        n <= 1299 ? `../assets/e/HollowFaceLoop_${n}.jpg`
+                  : `../assets/HollowFaceLoop_${n}.jpg`;
+
+      let mode = "auto";    // "auto" or "manual"
+      let frame = FIRST;
+      let holdTimer = null;
+
+      const modeRotate = pipRotate({
+        items: ["Auto-play", "Manual step"],
+        defaultIndex: 0,
+        help: "switch between auto-play and manual frame-step modes",
+        onChange: (i) => {
+          mode = i === 0 ? "auto" : "manual";
+          applyMode();
+        },
       });
+
+      const runToggle = pipToggle({
+        label: "Run", help: "play or pause the rotation",
+        onChange: (on) => { on ? video.play().catch(() => {}) : video.pause(); },
+      });
+      video.addEventListener("play",  () => runToggle.setAttribute("aria-pressed", "true"));
+      video.addEventListener("pause", () => runToggle.setAttribute("aria-pressed", "false"));
+
       const speed = pipSlider({
         label: "Speed", min: 0.25, max: 4, step: 0.25, value: 1,
         help: "change video playback speed",
         format: (v) => v.toFixed(2) + "×",
         onChange: (v) => { video.playbackRate = v; },
       });
+
+      const back = pipButton({ label: "◂ d", help: "step back one frame (or press d)" });
+      const num = document.createElement("span");
+      num.className = "ex1-frame-num";
+      num.textContent = `frame ${frame}`;
+      const fwd = pipButton({ label: "a ▸", help: "step forward one frame (or press a)" });
+
       const reset = pipButton({
-        label: "Reset", help: "rewind and restore the default speed",
+        label: "Reset", help: "rewind and restore defaults",
         onClick: () => {
-          video.pause();
-          video.currentTime = 0;
-          speed._reset();
-          runToggle._reset();
+          video.pause(); video.currentTime = 0;
+          speed._reset(); runToggle._reset();
+          frame = FIRST; img.src = frameUrl(frame); num.textContent = `frame ${frame}`;
         },
       });
-      controls.append(runToggle, speed, reset);
+
+      controls.append(modeRotate, runToggle, speed, back, num, fwd, reset);
+
+      function renderFrame() {
+        img.src = frameUrl(frame);
+        num.textContent = `frame ${frame}`;
+      }
+      function step(delta) {
+        frame = Math.max(FIRST, Math.min(LAST, frame + delta));
+        renderFrame();
+      }
+      function startHold(delta) {
+        stopHold();
+        step(delta);
+        holdTimer = setInterval(() => step(delta), 80);
+      }
+      function stopHold() {
+        if (holdTimer) clearInterval(holdTimer);
+        holdTimer = null;
+      }
+      fwd.addEventListener("pointerdown", (e) => { if (mode === "manual") { startHold(1); e.preventDefault(); } });
+      back.addEventListener("pointerdown", (e) => { if (mode === "manual") { startHold(-1); e.preventDefault(); } });
+      document.addEventListener("pointerup", stopHold);
+      document.addEventListener("pointercancel", stopHold);
+
+      document.addEventListener("keydown", (e) => {
+        if (mode !== "manual") return;
+        if (e.key === "a") { step(1); e.preventDefault(); }
+        else if (e.key === "d") { step(-1); e.preventDefault(); }
+      });
+
+      function applyMode() {
+        if (mode === "auto") {
+          img.hidden = true;
+          video.hidden = false;
+          runToggle.disabled = false;
+          speed.querySelector("input").disabled = false;
+          back.disabled = true; fwd.disabled = true;
+          num.style.opacity = "0.4";
+        } else {
+          //Stop the video before switching to manual mode.
+          video.pause(); video.currentTime = 0;
+          runToggle._reset();
+          video.hidden = true;
+          img.hidden = false;
+          if (!img.src) renderFrame();
+          runToggle.disabled = true;
+          speed.querySelector("input").disabled = true;
+          back.disabled = false; fwd.disabled = false;
+          num.style.opacity = "1";
+        }
+      }
+
+      //Preload a few frames near the start so the first step is instant.
+      for (let i = FIRST; i < FIRST + 10; i++) { const p = new Image(); p.src = frameUrl(i); }
+      applyMode();
     });
   </script>
 </body>

@@ -4,7 +4,7 @@
 //reusable widgets (toggles, sliders, navigation, help banner).
 
 const PIP_EXAMPLES = [
-  { n: 1,  title: "Hollow Face 1" },
+  { n: 1,  title: "Hollow Face" },
   { n: 2,  title: "That Fat Bat" },
   { n: 3,  title: "Da Tha" },
   { n: 4,  title: "Var Var" },
@@ -16,14 +16,12 @@ const PIP_EXAMPLES = [
   { n: 10, title: "Noisy Room" },
   { n: 11, title: "Reporter" },
   { n: 12, title: "Ames Room" },
-  { n: 13, title: "Ames Room Revisited" },
   { n: 14, title: "The Dress" },
   { n: 15, title: "The Dress Revisited" },
   { n: 16, title: "Two Grays" },
   { n: 17, title: "Shepard Tables" },
   { n: 18, title: "Moon Walk" },
-  { n: 19, title: "Hollow Face 2" },
-  { n: 20, title: "Chess" },
+  { n: 19, title: "Chess" },
 ];
 
 //Build the home + example menu DOM into every .pip-nav placeholder.
@@ -38,18 +36,23 @@ function pipBuildNav(currentN) {
     home.textContent = "Home";
     nav.appendChild(home);
 
-    if (currentN > 1) {
+    //Walk the curated list so prev/next skip over any removed examples
+    //instead of assuming consecutive numbering.
+    const idx = PIP_EXAMPLES.findIndex((ex) => ex.n === currentN);
+    if (idx > 0) {
+      const p = PIP_EXAMPLES[idx - 1];
       const prev = document.createElement("a");
       prev.className = "pip-home";
-      prev.href = `${currentN - 1}_html.html`;
-      prev.textContent = `← Example ${currentN - 1}`;
+      prev.href = `${p.n}_html.html`;
+      prev.textContent = `← Example ${p.n}`;
       nav.appendChild(prev);
     }
-    if (currentN < PIP_EXAMPLES.length) {
+    if (idx >= 0 && idx < PIP_EXAMPLES.length - 1) {
+      const nx = PIP_EXAMPLES[idx + 1];
       const next = document.createElement("a");
       next.className = "pip-home";
-      next.href = `${currentN + 1}_html.html`;
-      next.textContent = `Example ${currentN + 1} →`;
+      next.href = `${nx.n}_html.html`;
+      next.textContent = `Example ${nx.n} →`;
       nav.appendChild(next);
     }
 
