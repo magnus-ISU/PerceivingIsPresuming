@@ -21,98 +21,96 @@ html, body {
   overflow-x: hidden;
 }
 
-main {
-  padding: 0.75rem;
-  max-width: 100%;
-}
+/* Use dynamic viewport units where available so the "viewport" the layout
+   targets accounts for mobile browser chrome (URL bar, gesture areas). */
+html, body { min-height: 100vh; min-height: 100dvh; }
+
+main { display: block; }
 
 .pip-title {
-  margin: 0 0 0.5rem;
-  font-size: clamp(1.25rem, 2.5vw + 0.5rem, 1.75rem);
+  margin: 0;
+  font-size: clamp(1.1rem, 2vw + 0.4rem, 1.5rem);
   color: var(--accent-bright);
+  line-height: 1.2;
 }
 
+/* The layout is a grid sized to the visible viewport on desktop. On mobile
+   it still locks the visible "above the fold" content to one screen height
+   — stage fills the remaining row — but the instructions sit below the
+   stage so only their header peeks above the fold; the rest scrolls in. */
 .pip-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 24rem);
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 22rem);
+  grid-template-rows: auto 1fr auto auto;
   grid-template-areas:
     "title  title"
     "stage  instructions"
     "help   help"
     "nav    nav";
-  gap: 0.75rem 1rem;
-  align-items: start;
+  gap: 0.4rem 0.6rem;
+  padding: 0.4rem;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .pip-title { grid-area: title; }
+.pip-help { grid-area: help; }
+.pip-nav { grid-area: nav; }
+.pip-instructions { grid-area: instructions; }
 
 .pip-help {
-  grid-area: help;
   /* Reserve enough vertical space for two lines so the surrounding layout
      does not shift when help text appears, disappears, or changes length. */
-  min-height: 3rem;
-  padding: 0.5rem 0.75rem;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.6rem;
   background: rgba(20, 100, 255, 0.12);
   border: 1px solid rgba(20, 100, 255, 0.4);
   border-radius: 4px;
   color: var(--accent);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
-  /* Hidden when no help is active, but still occupies its reserved row so the
-     layout below it does not move. */
   visibility: hidden;
 }
 .pip-help.pip-help-visible { visibility: visible; }
 
+/* The stage is a flex column that fills its grid row entirely. Its media
+   frame absorbs all remaining vertical space after the controls have
+   taken what they need, so videos and canvases grow to fit the viewport. */
 .pip-stage {
   grid-area: stage;
   min-width: 0;
-  background: #2b2b2b;
-  border: 2px solid var(--panel-border);
-  border-radius: 4px;
-  padding: 0.75rem;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  align-items: stretch;
-  /* Stage fills the viewport-tall column so the media frame can grow to
-     fill the space that the header, controls and footer don't use. */
-  min-height: calc(100vh - 12rem);
+  gap: 0.4rem;
 }
 
 .pip-stage > .pip-controls,
 .pip-stage > .pip-sliders {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
+  gap: 0.4rem 0.6rem;
   align-items: center;
   flex: 0 0 auto;
 }
 .pip-stage > .pip-sliders {
   flex-direction: column;
   align-items: stretch;
-  gap: 0.5rem;
+  gap: 0.3rem;
 }
 
-/* The media frame is a sized placeholder that reserves space for one or
-   more overlapping media elements. Its size never changes when individual
-   media inside it show or hide, so toggling controls never reflows the
-   document. Children share the frame's box via absolute positioning.
-   An explicit aspect-ratio guarantees the frame has a real height even
-   when no media is currently visible inside it — so the controls below
-   it stay put across every state change. */
+/* The media frame is a flex item that absorbs all remaining height in the
+   stage. Media inside is centered and sized via object-fit:contain — so it
+   scales up to whichever of the available width or height is smaller while
+   preserving aspect ratio. The frame's background is transparent so any
+   letterboxing reads as page background rather than a visible bar. */
 .pip-media-frame {
   position: relative;
   flex: 1 1 0;
-  /* Reserve real height even when no media is visible inside. Flex-grow
-     makes the frame fill the rest of the stage; min-height guarantees a
-     sensible baseline on short viewports. The frame's size never changes
-     based on its children (they are all absolute-positioned). */
-  min-height: max(16rem, 40vh);
+  min-height: 0;
   width: 100%;
-  background: #000;
-  border-radius: 4px;
+  background: transparent;
   overflow: hidden;
 }
 .pip-media-frame > video,
@@ -124,11 +122,11 @@ main {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #000;
+  background: transparent;
   display: block;
 }
 
-/* Standalone media (not inside a frame) still grows to fill the stage. */
+/* Standalone media (not inside a frame) also grows to fill the stage. */
 .pip-stage > video,
 .pip-stage > img,
 .pip-stage > canvas,
@@ -139,7 +137,7 @@ main {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #000;
+  background: transparent;
 }
 .pip-stage [hidden] { display: none !important; }
 .pip-media-frame > [hidden] {
@@ -150,39 +148,38 @@ main {
 }
 
 .pip-instructions {
-  grid-area: instructions;
   background: var(--panel);
   border: 2px solid var(--panel-border);
   border-radius: 4px;
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 1rem;
   min-width: 0;
+  overflow: auto;
 }
 .pip-instructions-title {
-  margin: 0 0 0.75rem;
-  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 .pip-instructions ol {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   padding-left: 1.25rem;
 }
-.pip-instructions ol li { margin-bottom: 0.5rem; }
+.pip-instructions ol li { margin-bottom: 0.4rem; font-size: 0.95rem; }
 .pip-instructions .pip-nav-note {
   margin: 0;
-  padding-top: 0.5rem;
+  padding-top: 0.4rem;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .pip-nav {
-  grid-area: nav;
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: flex-start;
   flex-wrap: wrap;
-  padding: 0.75rem;
+  padding: 0.4rem 0.6rem;
   background: var(--panel);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 4px;
@@ -197,8 +194,9 @@ main {
   justify-content: center;
   gap: 0.4rem;
   font: inherit;
+  font-size: 0.9rem;
   font-weight: 600;
-  padding: 0.45rem 0.95rem;
+  padding: 0.35rem 0.75rem;
   background: var(--accent-soft);
   border: 1px solid var(--accent);
   border-radius: 3px;
@@ -206,7 +204,7 @@ main {
   text-decoration: none;
   cursor: pointer;
   user-select: none;
-  min-height: 2.25rem;
+  min-height: 2rem;
 }
 .pip-btn:hover, .pip-btn:focus-visible,
 .pip-toggle:hover, .pip-toggle:focus-visible,
@@ -241,9 +239,6 @@ main {
   cursor: not-allowed;
 }
 
-/* Rotate-button label stack: every option occupies the same grid cell so
-   the button is sized to fit the widest label, and clicking through the
-   options never changes the button width. */
 .pip-rotate-stack {
   display: inline-grid;
   align-items: center;
@@ -258,18 +253,18 @@ main {
 
 .pip-slider {
   display: grid;
-  grid-template-columns: 7rem minmax(120px, 1fr) 4rem;
+  grid-template-columns: 6rem minmax(120px, 1fr) 4rem;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.9rem;
+  gap: 0.5rem;
+  font-size: 0.85rem;
   padding: 0;
-  min-height: 1.75rem;
+  min-height: 1.5rem;
 }
 .pip-slider label {
   color: var(--muted);
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 0.05em;
 }
 .pip-slider input[type="range"] {
@@ -285,12 +280,13 @@ main {
 .pip-menu { flex: 1; min-width: 200px; }
 .pip-menu summary {
   cursor: pointer;
-  padding: 0.4rem 0.75rem;
+  padding: 0.35rem 0.6rem;
   background: var(--accent-soft);
   border: 1px solid var(--accent);
   border-radius: 3px;
   color: var(--accent);
   font-weight: 600;
+  font-size: 0.9rem;
   user-select: none;
   list-style: none;
 }
@@ -304,21 +300,21 @@ main {
 .pip-menu[open] summary::before { transform: rotate(90deg); }
 .pip-menu-list {
   list-style: none;
-  margin: 0.5rem 0 0;
+  margin: 0.4rem 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.3rem;
 }
 .pip-menu-list a {
   display: block;
-  padding: 0.4rem 0.6rem;
+  padding: 0.3rem 0.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 3px;
   color: var(--text);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 .pip-menu-list a:hover,
 .pip-menu-list a:focus-visible {
@@ -329,12 +325,13 @@ main {
 
 .pip-words {
   text-align: center;
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-size: clamp(1rem, 2vw, 1.3rem);
   color: var(--accent-bright);
-  margin: 0.25rem 0;
+  margin: 0;
   /* Always reserve a single line of vertical space so toggling Show Words
      on and off doesn't shift the controls below it. */
   min-height: 1.5em;
+  flex: 0 0 auto;
 }
 .pip-words-empty { visibility: hidden; }
 
@@ -347,29 +344,35 @@ kbd {
   font-size: 0.85em;
 }
 
+/* Mobile layout: the stage still occupies the entire visible viewport
+   (minus title and a small instructions-header peek at the bottom). The
+   instructions panel sits below stage; only its header is initially
+   visible and the rest scrolls into view. */
 @media (max-width: 900px) {
   .pip-layout {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
+    /* All rows sized to content. The stage row's content includes a
+       calc-derived min-height that fills the viewport minus the bits we
+       want visible above the fold. */
+    grid-template-rows: auto auto auto auto;
     grid-template-areas:
       "title"
       "stage"
       "instructions"
-      "help"
       "nav";
+    min-height: 100dvh;
+  }
+  /* Hide the hover-help banner on touch viewports — touch users don't hover. */
+  .pip-help { display: none; }
+  /* Stage fills the viewport minus title, layout padding, and a small
+     peek of the instructions header (~3rem). Total content extends
+     beyond the fold, the body scrolls vertically. */
+  .pip-stage {
+    min-height: calc(100dvh - 1.5rem - 3.25rem - 1.5rem);
   }
   .pip-slider {
     grid-template-columns: 1fr;
-    gap: 0.25rem;
+    gap: 0.15rem;
   }
   .pip-slider output { text-align: left; }
-  /* On phone-sized viewports the controls become the main thing the user
-     interacts with, so the media gets a more aggressive cap to keep
-     everything above the fold. Individual examples may override
-     --pip-media-max-h-mobile when their controls are smaller. */
-  .pip-stage video,
-  .pip-stage img,
-  .pip-stage canvas,
-  .pip-stage iframe {
-    max-height: var(--pip-media-max-h-mobile, 38vh);
-  }
 }
