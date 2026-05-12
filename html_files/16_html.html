@@ -3,31 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Example 16: Two Grays</title>
+  <title>Example 16: Shepard Tables</title>
   <link rel="stylesheet" href="../app/pip.css">
   <script src="../app/pip.js" defer></script>
-  <style>
-    .pip-media-frame canvas { touch-action: none; }
-  </style>
 </head>
 <body>
   <main>
     <div class="pip-layout" data-example="16">
-      <h1 class="pip-title">Example 16: Two Grays</h1>
+      <h1 class="pip-title">Example 16: Shepard Tables</h1>
       <div class="pip-help"></div>
-      <div class="pip-stage" id="ex16-stage">
-        <div class="pip-controls" id="ex16-controls"></div>
-        <div class="pip-media-frame">
-          <canvas id="ex16-canvas" width="820" height="620"></canvas>
-        </div>
-      </div>
+      <div class="pip-stage" id="ex17-stage"></div>
       <aside class="pip-instructions">
         <h2 class="pip-instructions-title">Instructions</h2>
         <ol>
-          <li>Look at the image — the upper square <strong>A</strong> and the lower square <strong>B</strong> appear to be very different shades of gray.</li>
-          <li>Click and drag the small gray rectangle in the upper-left over the A and B squares.</li>
-          <li>The rectangle is exactly the same shade of gray as both A and B — your brain is correcting for the apparent lighting context.</li>
-          <li>Use <strong>Show Connection</strong> to draw a uniform bridge between the two squares, and <strong>Show Outline</strong> to add a border that breaks the lightness-constancy effect.</li>
+          <li>Pick a video and press <strong>Run</strong>.</li>
+          <li>The two tabletops look like they have very different shapes — long and narrow vs. short and wide.</li>
+          <li>The animation rotates or overlays one onto the other so you can see they're actually identical parallelograms.</li>
+          <li>Even after seeing the proof, the size illusion persists when you go back to the still image.</li>
         </ol>
         <p class="pip-nav-note">Click Home to return to the examples list.</p>
       </aside>
@@ -36,129 +28,97 @@
   </main>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const canvas = document.getElementById("ex16-canvas");
-      const ctx = canvas.getContext("2d");
-      const controls = document.getElementById("ex16-controls");
-      const W = canvas.width;
-      const H = canvas.height;
+      const stage = document.getElementById("ex17-stage");
+      const frame = document.createElement("div");
+      frame.className = "pip-media-frame";
+      stage.appendChild(frame);
+      const labels = ["Move", "Exchange", "Obama"];
+      const sources = labels.map((_, i) => `../assets/17_${i}shepard.mp4`);
+      //One persistent video element. Switching selectors changes its src,
+      //so the media frame always reserves space and never reflows.
+      const video = document.createElement("video");
+      video.loop = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.playbackRate = 2;
+      frame.appendChild(video);
 
-      const img = new Image();
-      img.src = "../assets/16_twoGrays.png";
-      let imgReady = false;
-      img.addEventListener("load", () => { imgReady = true; render(); });
+      const controls = document.createElement("div");
+      controls.className = "pip-controls";
+      stage.appendChild(controls);
 
-      let showConnection = false;
-      let showOutline = false;
-      const grayRect = { x: 20, y: 30, size: 100 };
-      let dragging = false;
-      let imgScale = 0.5;  //the original sketch displays the source image at half size
+      let isRunning = false;
+      let whichVideo = 1;
+      video.src = sources[whichVideo];
 
-      const toggleConn = pipToggle({
-        label: "Show Connection",
-        help: "draw a uniform gray bridge between the upper and lower squares",
-        onChange: (on) => { showConnection = on; },
+      function selectVideo(i) {
+        if (i === whichVideo) return;
+        const wasPlaying = !video.paused;
+        video.pause();
+        whichVideo = i;
+        video.src = sources[i];
+        if (wasPlaying) {
+          video.currentTime = 0;
+          video.play().catch(() => {});
+        }
+      }
+
+      //Three explicit, mutually-exclusive video selectors. Each button
+      //directly selects its video; the currently-selected one shows as
+      //pressed via aria-pressed and the active toggle background.
+      const helpText = [
+        "show the video where one tabletop moves onto the other to prove their tops are identical",
+        "show the video that swaps the two tabletops, demonstrating their interchangeable shape",
+        "show the 'Obama' variant that overlays the tabletops onto a face for size comparison",
+      ];
+      const selectorButtons = labels.map((label, i) => {
+        const btn = pipToggle({
+          label,
+          defaultOn: i === whichVideo,
+          help: helpText[i],
+          onChange: () => {
+            if (whichVideo === i) {
+              btn.setAttribute("aria-pressed", "true");
+              return;
+            }
+            selectorButtons.forEach((b, j) => {
+              if (j !== i) b.setAttribute("aria-pressed", "false");
+            });
+            selectVideo(i);
+          },
+        });
+        return btn;
       });
-      const toggleOutline = pipToggle({
-        label: "Show Outline",
-        help: "draw a border around the bridge — does it still look uniform?",
-        onChange: (on) => { showOutline = on; },
-      });
-      const buttonReset = pipButton({
-        label: "Reset", help: "return the rectangle and toggles to defaults",
-        onClick: () => {
-          grayRect.x = 20; grayRect.y = 30;
-          toggleConn._reset();
-          toggleOutline._reset();
+
+      const toggleRun = pipToggle({
+        label: "Run", help: "play or pause the demonstration video",
+        onChange: (on) => {
+          isRunning = on;
+          if (on) {
+            video.currentTime = 0;
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+          selectorButtons.forEach((b) => b.disabled = on);
         },
       });
-      controls.append(buttonReset, toggleConn, toggleOutline);
-
-      function clientToCanvas(evt) {
-        //The canvas is rendered with `object-fit: contain` inside a sized
-        //frame, so the drawn bitmap is letterboxed within the element's
-        //CSS box. Compute the scale and offset of the visible content area
-        //before mapping the pointer location back into bitmap coordinates.
-        const rect = canvas.getBoundingClientRect();
-        const cssX = evt.clientX - rect.left;
-        const cssY = evt.clientY - rect.top;
-        const bmpAspect = canvas.width / canvas.height;
-        const elAspect = rect.width / rect.height;
-        let scale, offX = 0, offY = 0;
-        if (elAspect > bmpAspect) {
-          //Wider than the bitmap → letterbox bars on left and right.
-          scale = rect.height / canvas.height;
-          offX = (rect.width - canvas.width * scale) / 2;
-        } else {
-          //Taller than the bitmap → letterbox bars top and bottom.
-          scale = rect.width / canvas.width;
-          offY = (rect.height - canvas.height * scale) / 2;
-        }
-        return { x: (cssX - offX) / scale, y: (cssY - offY) / scale };
-      }
-      canvas.addEventListener("pointerdown", (e) => {
-        const { x, y } = clientToCanvas(e);
-        if (x >= grayRect.x && x <= grayRect.x + grayRect.size &&
-            y >= grayRect.y && y <= grayRect.y + grayRect.size) {
-          dragging = true;
-          canvas.setPointerCapture(e.pointerId);
-          e.preventDefault();
-        }
+      const reset = pipButton({
+        label: "Reset", help: "stop playback and rewind",
+        onClick: () => {
+          video.pause();
+          video.currentTime = 0;
+          toggleRun._reset();
+        },
       });
-      canvas.addEventListener("pointermove", (e) => {
-        if (!dragging) return;
-        const { x, y } = clientToCanvas(e);
-        grayRect.x = Math.max(0, Math.min(W - grayRect.size, x - grayRect.size / 2));
-        grayRect.y = Math.max(0, Math.min(H - grayRect.size, y - grayRect.size / 2));
-      });
-      const stopDrag = (e) => {
-        if (!dragging) return;
-        dragging = false;
-        try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
-      };
-      canvas.addEventListener("pointerup", stopDrag);
-      canvas.addEventListener("pointercancel", stopDrag);
 
-      const GRAY = "rgb(137, 137, 137)";
-      function render() {
-        ctx.fillStyle = "#000";
-        ctx.fillRect(0, 0, W, H);
-        if (imgReady) {
-          const drawW = img.width * imgScale;
-          const drawH = img.height * imgScale;
-          ctx.drawImage(img, 10, 10, drawW, drawH);
-
-          if (showConnection) {
-            //Roughly bridges the A and B squares vertically in the original layout.
-            ctx.fillStyle = GRAY;
-            if (showOutline) {
-              ctx.strokeStyle = "rgba(5, 164, 248, 0.6)";
-              ctx.lineWidth = 2;
-            }
-            const bx = drawW * 0.42 + 10;
-            ctx.fillRect(bx, 60, 100, drawH - 90);
-            if (showOutline) ctx.strokeRect(bx, 60, 100, drawH - 90);
-          }
-        }
-
-        //The draggable gray rectangle.
-        ctx.fillStyle = GRAY;
-        ctx.fillRect(grayRect.x, grayRect.y, grayRect.size, grayRect.size);
-        if (dragging) {
-          ctx.strokeStyle = "rgba(5, 164, 248, 0.85)";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(grayRect.x, grayRect.y, grayRect.size, grayRect.size);
-        }
-        //Hint text while in starting position.
-        if (grayRect.x === 20 && grayRect.y === 30) {
-          ctx.fillStyle = "#fff";
-          ctx.font = "14px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText("DRAG ME", grayRect.x + grayRect.size / 2, grayRect.y + grayRect.size / 2 - 6);
-          ctx.fillText("OVER A AND B", grayRect.x + grayRect.size / 2, grayRect.y + grayRect.size / 2 + 12);
-          ctx.textAlign = "start";
-        }
-      }
-      pipLoop(render);
+      controls.append(toggleRun, reset);
+      const selectorRow = document.createElement("div");
+      selectorRow.className = "pip-controls";
+      selectorRow.setAttribute("role", "radiogroup");
+      selectorRow.setAttribute("aria-label", "Video selector");
+      selectorButtons.forEach((b) => selectorRow.appendChild(b));
+      stage.appendChild(selectorRow);
     });
   </script>
 </body>

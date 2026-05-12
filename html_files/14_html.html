@@ -3,31 +3,59 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Example 14: The Dress</title>
+  <title>Example 14: The Dress Revisited</title>
   <link rel="stylesheet" href="../app/pip.css">
   <script src="../app/pip.js" defer></script>
 </head>
 <body>
   <main>
     <div class="pip-layout" data-example="14">
-      <h1 class="pip-title">Example 14: The Dress</h1>
+      <h1 class="pip-title">Example 14: The Dress Revisited</h1>
       <div class="pip-help"></div>
-      <div class="pip-stage">
+      <div class="pip-stage" id="ex15-stage">
         <div class="pip-media-frame">
-          <img src="../assets/14_theDress.jpg" alt="The dress">
+          <img id="ex15-img" src="../assets/15_dressDay.png" alt="The dress, day lighting">
         </div>
+        <div class="pip-controls" id="ex15-controls"></div>
       </div>
       <aside class="pip-instructions">
         <h2 class="pip-instructions-title">Instructions</h2>
         <ol>
-          <li>Look at the dress. Is it black and blue, or white and gold?</li>
-          <li>People perceive the same pixels very differently depending on the prior they bring about lighting — their visual system "discounts" what it assumes is the illuminant color.</li>
-          <li>Try viewing on a different screen or under different ambient lighting and see whether your answer shifts.</li>
+          <li>Cycle through the four versions using the rotator below the image, or press <kbd>←</kbd> / <kbd>→</kbd>.</li>
+          <li>"Day Light" and "Night Light" show the same dress with two different assumed lightings.</li>
+          <li>The side-by-side views (with and without background) show how strongly the background context changes the apparent color.</li>
         </ol>
         <p class="pip-nav-note">Click Home to return to the examples list.</p>
       </aside>
       <nav class="pip-nav"></nav>
     </div>
   </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const pictures = [
+        { src: "../assets/15_dressDay.png",     label: "Day Light" },
+        { src: "../assets/15_dressNight.png",   label: "Night Light" },
+        { src: "../assets/15_dresses.png",      label: "Side-by-Side" },
+        { src: "../assets/15_noBackground.png", label: "Side-by-Side (no background)" },
+      ];
+      const img = document.getElementById("ex15-img");
+      const controls = document.getElementById("ex15-controls");
+
+      const rotate = pipRotate({
+        items: pictures.map((p) => p.label),
+        help: "click to cycle images, or use the left/right arrow keys",
+        onChange: (i) => {
+          img.src = pictures[i].src;
+          img.alt = `The dress — ${pictures[i].label}`;
+        },
+      });
+      controls.appendChild(rotate);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") { rotate.setIndex(rotate.index + 1); e.preventDefault(); }
+        else if (e.key === "ArrowLeft") { rotate.setIndex(rotate.index - 1); e.preventDefault(); }
+      });
+    });
+  </script>
 </body>
 </html>

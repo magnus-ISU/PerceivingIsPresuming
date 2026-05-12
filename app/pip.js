@@ -16,12 +16,12 @@ const PIP_EXAMPLES = [
   { n: 10, title: "Noisy Room" },
   { n: 11, title: "Reporter" },
   { n: 12, title: "Ames Room" },
-  { n: 14, title: "The Dress" },
-  { n: 15, title: "The Dress Revisited" },
-  { n: 16, title: "Two Grays" },
-  { n: 17, title: "Shepard Tables" },
-  { n: 18, title: "Moon Walk" },
-  { n: 19, title: "Chess" },
+  { n: 13, title: "The Dress" },
+  { n: 14, title: "The Dress Revisited" },
+  { n: 15, title: "Two Grays" },
+  { n: 16, title: "Shepard Tables" },
+  { n: 17, title: "Moon Walk" },
+  { n: 18, title: "Chess" },
 ];
 
 //Build the home + example menu DOM into every .pip-nav placeholder.

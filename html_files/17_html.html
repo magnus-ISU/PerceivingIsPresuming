@@ -3,123 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Example 17: Shepard Tables</title>
+  <title>Example 17: Moon Walk</title>
   <link rel="stylesheet" href="../app/pip.css">
   <script src="../app/pip.js" defer></script>
 </head>
 <body>
   <main>
     <div class="pip-layout" data-example="17">
-      <h1 class="pip-title">Example 17: Shepard Tables</h1>
+      <h1 class="pip-title">Example 17: Moon Walk</h1>
       <div class="pip-help"></div>
-      <div class="pip-stage" id="ex17-stage"></div>
+      <div class="pip-stage">
+        <p>The original demonstration for this example was a YouTube clip that has since been removed due to a copyright claim.</p>
+        <p>The illusion involves a person seemingly walking forward and backward depending on whether you interpret their motion as gliding feet or stepping feet — your brain's prior about walking dominates the raw motion signal.</p>
+        <p>Searching <a href="https://www.youtube.com/results?search_query=moonwalk+illusion+perception" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 600;">YouTube for "moonwalk illusion perception"</a> will turn up similar demonstrations.</p>
+      </div>
       <aside class="pip-instructions">
         <h2 class="pip-instructions-title">Instructions</h2>
         <ol>
-          <li>Pick a video and press <strong>Run</strong>.</li>
-          <li>The two tabletops look like they have very different shapes — long and narrow vs. short and wide.</li>
-          <li>The animation rotates or overlays one onto the other so you can see they're actually identical parallelograms.</li>
-          <li>Even after seeing the proof, the size illusion persists when you go back to the still image.</li>
+          <li>When a walking video is available, watch for the moment your interpretation of the direction of motion flips.</li>
+          <li>The classic version: a person appears to glide as if moonwalking, then suddenly looks like they're walking normally — same pixels, different prior.</li>
         </ol>
         <p class="pip-nav-note">Click Home to return to the examples list.</p>
       </aside>
       <nav class="pip-nav"></nav>
     </div>
   </main>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const stage = document.getElementById("ex17-stage");
-      const frame = document.createElement("div");
-      frame.className = "pip-media-frame";
-      stage.appendChild(frame);
-      const labels = ["Move", "Exchange", "Obama"];
-      const sources = labels.map((_, i) => `../assets/17_${i}shepard.mp4`);
-      //One persistent video element. Switching selectors changes its src,
-      //so the media frame always reserves space and never reflows.
-      const video = document.createElement("video");
-      video.loop = true;
-      video.playsInline = true;
-      video.preload = "auto";
-      video.playbackRate = 2;
-      frame.appendChild(video);
-
-      const controls = document.createElement("div");
-      controls.className = "pip-controls";
-      stage.appendChild(controls);
-
-      let isRunning = false;
-      let whichVideo = 1;
-      video.src = sources[whichVideo];
-
-      function selectVideo(i) {
-        if (i === whichVideo) return;
-        const wasPlaying = !video.paused;
-        video.pause();
-        whichVideo = i;
-        video.src = sources[i];
-        if (wasPlaying) {
-          video.currentTime = 0;
-          video.play().catch(() => {});
-        }
-      }
-
-      //Three explicit, mutually-exclusive video selectors. Each button
-      //directly selects its video; the currently-selected one shows as
-      //pressed via aria-pressed and the active toggle background.
-      const helpText = [
-        "show the video where one tabletop moves onto the other to prove their tops are identical",
-        "show the video that swaps the two tabletops, demonstrating their interchangeable shape",
-        "show the 'Obama' variant that overlays the tabletops onto a face for size comparison",
-      ];
-      const selectorButtons = labels.map((label, i) => {
-        const btn = pipToggle({
-          label,
-          defaultOn: i === whichVideo,
-          help: helpText[i],
-          onChange: () => {
-            if (whichVideo === i) {
-              btn.setAttribute("aria-pressed", "true");
-              return;
-            }
-            selectorButtons.forEach((b, j) => {
-              if (j !== i) b.setAttribute("aria-pressed", "false");
-            });
-            selectVideo(i);
-          },
-        });
-        return btn;
-      });
-
-      const toggleRun = pipToggle({
-        label: "Run", help: "play or pause the demonstration video",
-        onChange: (on) => {
-          isRunning = on;
-          if (on) {
-            video.currentTime = 0;
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-          selectorButtons.forEach((b) => b.disabled = on);
-        },
-      });
-      const reset = pipButton({
-        label: "Reset", help: "stop playback and rewind",
-        onClick: () => {
-          video.pause();
-          video.currentTime = 0;
-          toggleRun._reset();
-        },
-      });
-
-      controls.append(toggleRun, reset);
-      const selectorRow = document.createElement("div");
-      selectorRow.className = "pip-controls";
-      selectorRow.setAttribute("role", "radiogroup");
-      selectorRow.setAttribute("aria-label", "Video selector");
-      selectorButtons.forEach((b) => selectorRow.appendChild(b));
-      stage.appendChild(selectorRow);
-    });
-  </script>
 </body>
 </html>
